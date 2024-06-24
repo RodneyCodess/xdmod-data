@@ -1,5 +1,8 @@
 # xdmod-data Changelog
 
+## Main development branch
+- Implement 100% test coverage ([\#27](https://github.com/ubccr/xdmod-data/pull/27)).
+
 ## v1.0.1 (2024-06-XX)
 This release has bug fixes, performance improvements, and updates for compatibility, tests, and documentation.
 - Add borders to README images ([\#12](https://github.com/ubccr/xdmod-data/pull/12)).
