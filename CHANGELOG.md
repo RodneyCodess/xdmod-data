@@ -2,6 +2,7 @@
 
 ## Main development branch
 - Implement 100% test coverage ([\#27](https://github.com/ubccr/xdmod-data/pull/27)).
+- Update Flake8 rules ([\#28](https://github.com/ubccr/xdmod-data/pull/28)).
 
 ## v1.0.1 (2024-06-XX)
 This release has bug fixes, performance improvements, and updates for compatibility, tests, and documentation.
