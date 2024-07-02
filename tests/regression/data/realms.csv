@@ -1,8 +1,4 @@
 id,label
-Accounts,Accounts
-Allocations,Allocations
 Cloud,Cloud
-Gateways,Gateways
 Jobs,Jobs
-Requests,Requests
-SUPREMM,SUPREMM
+Storage,Storage
