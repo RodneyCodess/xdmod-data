@@ -30,7 +30,7 @@ def __assert_dfs_equal(
     columns_name=None,
 ):
     if 'GENERATE_DATA_FILES' in os.environ:
-        actual.to_csv(DATA_DIR + '/' + data_file)
+        actual.to_csv(DATA_DIR + '/' + data_file)  # pragma: no cover
     else:
         expected = pandas.read_csv(
             DATA_DIR + '/' + data_file,
@@ -123,10 +123,11 @@ def test_get_data_filter_user(valid_dw):
 @pytest.mark.parametrize(
     'aggregation_unit,data_file',
     [
+        ('Month', 'jobs-2016-2017-month.csv'),
         ('Quarter', 'jobs-2016-2017-quarters.csv'),
         ('Year', 'jobs-2016-2017-years.csv'),
     ],
-    ids=('quarter', 'year'),
+    ids=('month', 'quarter', 'year'),
 )
 def test_get_data(valid_dw, aggregation_unit, data_file):
     data = valid_dw.get_data(
