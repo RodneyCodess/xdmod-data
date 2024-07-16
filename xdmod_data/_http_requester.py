@@ -123,7 +123,7 @@ class _HttpRequester:
     def __assert_connection_to_xdmod_host(self):
         try:
             self.__request()
-        except RuntimeError as e:
+        except RuntimeError as e:  # pragma: no cover
             raise RuntimeError(
                 "Could not connect to xdmod_host '" + self.__xdmod_host
                 + "': " + str(e),
@@ -148,7 +148,7 @@ class _HttpRequester:
             try:
                 response_json = json.loads(response.text)
                 msg = ': ' + response_json['message']
-            except json.JSONDecodeError:
+            except json.JSONDecodeError:  # pragma: no cover
                 pass
             if response.status_code == 401:
                 msg = (
@@ -207,6 +207,6 @@ class _HttpRequester:
             except RuntimeError as e:
                 if '404' in str(e):
                     self.__raw_data_limit = 'NA'
-                else:
+                else:  # pragma: no cover
                     raise
         return self.__raw_data_limit
