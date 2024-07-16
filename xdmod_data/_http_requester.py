@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import requests
 from urllib.parse import urlencode
 import xdmod_data._validator as _validator
@@ -10,12 +11,13 @@ class _HttpRequester:
     def __init__(self, xdmod_host):
         self.__in_runtime_context = False
         _validator._assert_str('xdmod_host', xdmod_host)
+        xdmod_host = re.sub('/+$', '', xdmod_host)
         self.__xdmod_host = xdmod_host
         try:
             self.__api_token = os.environ['XDMOD_API_TOKEN']
         except KeyError:
             raise KeyError(
-                '`XDMOD_API_TOKEN` environment variable has not been set.'
+                '`XDMOD_API_TOKEN` environment variable has not been set.',
             ) from None
         self.__headers = {
             'Authorization': 'Bearer ' + self.__api_token,
@@ -42,24 +44,55 @@ class _HttpRequester:
 
     def _request_raw_data(self, params):
         url_params = self.__get_raw_data_url_params(params)
+        # Once XDMoD 10.5 is no longer supported, there will be no need to call
+        # __get_raw_data_limit(), and the if/else statement below will not be
+        # necessary — only the body of the 'if' branch will be needed.
         limit = self.__get_raw_data_limit()
         data = []
-        num_rows = limit
-        offset = 0
-        while num_rows == limit:
-            response = self._request_json(
-                path='/rest/v1/warehouse/raw-data?' + url_params
-                + '&offset=' + str(offset)
+        if limit == 'NA':
+            response_iter_lines = self.__request(
+                path='/rest/v1/warehouse/raw-data?' + url_params,
+                post_fields=None,
+                stream=True,
             )
-            partial_data = response['data']
-            data += partial_data
+            i = 0
+            for line in response_iter_lines:
+                line_text = line.decode('utf-8').replace('\x1e', '')
+                line_json = json.loads(line_text)
+                if i == 0:
+                    response = {'fields': line_json}
+                else:
+                    data.append(line_json)
+                    if params['show_progress']:
+                        progress_msg = (
+                            'Got ' + str(i) + ' row' + ('' if i == 1 else 's')
+                            + '...'
+                        )
+                        print(progress_msg, end='\r')
+                i += 1
             if params['show_progress']:
-                progress_msg = 'Got ' + str(len(data)) + ' rows...'
-                print(progress_msg, end='\r')
-            num_rows = len(partial_data)
-            offset += limit
-        if params['show_progress']:
-            print(progress_msg + 'DONE')
+                print(progress_msg + 'DONE')
+        else:
+            num_rows = limit
+            offset = 0
+            while num_rows == limit:
+                response = self._request_json(
+                    path='/rest/v1/warehouse/raw-data?' + url_params
+                    + '&offset=' + str(offset),
+                )
+                partial_data = response['data']
+                data += partial_data
+                if params['show_progress']:
+                    progress_msg = (
+                        'Got ' + str(len(data)) + ' row'
+                        + ('' if len(data) == 1 else 's')
+                        + '...'
+                    )
+                    print(progress_msg, end='\r')
+                num_rows = len(partial_data)
+                offset += limit
+            if params['show_progress']:
+                print(progress_msg + 'DONE')
         return (data, response['fields'])
 
     def _request_filter_values(self, realm_id, dimension_id):
@@ -90,13 +123,13 @@ class _HttpRequester:
     def __assert_connection_to_xdmod_host(self):
         try:
             self.__request()
-        except RuntimeError as e:
+        except RuntimeError as e:  # pragma: no cover
             raise RuntimeError(
-                'Could not connect to xdmod_host \'' + self.__xdmod_host
-                + '\': ' + str(e)
+                "Could not connect to xdmod_host '" + self.__xdmod_host
+                + "': " + str(e),
             ) from None
 
-    def __request(self, path='', post_fields=None):
+    def __request(self, path='', post_fields=None, stream=False):
         _validator._assert_runtime_context(self.__in_runtime_context)
         url = self.__xdmod_host + path
         if post_fields:
@@ -115,16 +148,19 @@ class _HttpRequester:
             try:
                 response_json = json.loads(response.text)
                 msg = ': ' + response_json['message']
-            except json.JSONDecodeError:
+            except json.JSONDecodeError:  # pragma: no cover
                 pass
             if response.status_code == 401:
                 msg = (
                     ': Make sure XDMOD_API_TOKEN is set to a valid API token.'
                 )
             raise RuntimeError(
-                'Error ' + str(response.status_code) + msg
+                'Error ' + str(response.status_code) + msg,
             ) from None
-        return response.text
+        if stream:
+            return response.iter_lines()
+        else:
+            return response.text
 
     def __get_data_post_fields(self, params):
         post_fields = {
@@ -140,7 +176,7 @@ class _HttpRequester:
         }
         for dimension in params['filters']:
             post_fields[dimension + '_filter'] = ','.join(
-                params['filters'][dimension]
+                params['filters'][dimension],
             )
         return post_fields
 
@@ -155,12 +191,22 @@ class _HttpRequester:
         if (params['filters']):
             for dimension in params['filters']:
                 results['filters[' + dimension + ']'] = ','.join(
-                    params['filters'][dimension]
+                    params['filters'][dimension],
                 )
         return urlencode(results)
 
+    # Once XDMoD 10.5 is no longer supported,
+    # there will be no need for this method.
     def __get_raw_data_limit(self):
         if self.__raw_data_limit is None:
-            response = self._request_json('/rest/v1/warehouse/raw-data/limit')
-            self.__raw_data_limit = int(response['data'])
+            try:
+                response = self._request_json(
+                    '/rest/v1/warehouse/raw-data/limit',
+                )
+                self.__raw_data_limit = int(response['data'])
+            except RuntimeError as e:
+                if '404' in str(e):
+                    self.__raw_data_limit = 'NA'
+                else:  # pragma: no cover
+                    raise
         return self.__raw_data_limit

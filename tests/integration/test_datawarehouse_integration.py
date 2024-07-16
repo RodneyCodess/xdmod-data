@@ -1,11 +1,12 @@
 from dotenv import load_dotenv
+import os
 from os.path import expanduser
 import pandas
 from pathlib import Path
 import pytest
 from xdmod_data.warehouse import DataWarehouse
 
-VALID_XDMOD_URL = 'https://xdmod.access-ci.org'
+VALID_XDMOD_HOST = os.environ['XDMOD_HOST']
 TOKEN_PATH = '~/.xdmod-data-token'
 INVALID_STR = 'asdlkfjsdlkfisdjkfjd'
 METHOD_PARAMS = {
@@ -28,23 +29,23 @@ METHOD_PARAMS = {
     'describe_realms': (),
     'describe_metrics': ('realm',),
     'describe_dimensions': ('realm',),
-    'get_filter_values': ('realm', 'dimension',),
+    'get_filter_values': ('realm', 'dimension'),
     'describe_raw_realms': (),
     'describe_raw_fields': ('realm',),
 }
-VALID_DATE = '2020-01-01'
+VALID_DATE = '2016-12-25'
 VALID_DIMENSION = 'Resource'
 VALID_VALUES = {
-  'duration': 'Previous month',
+  'duration': 'Yesterday',
   'realm': 'Jobs',
   'metric': 'CPU Hours: Total',
   'dimension': VALID_DIMENSION,
-  'filters': {VALID_DIMENSION: 'Expanse'},
+  'filters': {VALID_DIMENSION: 'phillips'},
   'dataset_type': 'timeseries',
   'aggregation_unit': 'Auto',
   'parameter': 'duration',
   'fields': ['Nodes'],
-  'show_progress': True,
+  'show_progress': False,
 }
 KEY_ERROR_TEST_VALUES_AND_MATCHES = {
     'duration': (INVALID_STR, 'Invalid value for `duration`'),
@@ -53,7 +54,8 @@ KEY_ERROR_TEST_VALUES_AND_MATCHES = {
     'dimension': (INVALID_STR, r'Dimension .* not found'),
     'filter_key': ({INVALID_STR: INVALID_STR}, r'Dimension .* not found'),
     'filter_value': (
-        {VALID_DIMENSION: INVALID_STR}, r'Filter value .* not found'
+        {VALID_DIMENSION: INVALID_STR},
+        r'Filter value .* not found',
     ),
     'dataset_type': (INVALID_STR, 'Invalid value for `dataset_type`'),
     'aggregation_unit': (INVALID_STR, 'Invalid value for `aggregation_unit`'),
@@ -92,8 +94,16 @@ for method in METHOD_PARAMS:
                 method + ':end_date',
             ]
             date_malformed_test_params += [
-                (method, 'start_date', {'duration': (INVALID_STR, VALID_DATE)}),
-                (method, 'end_date', {'duration': (VALID_DATE, INVALID_STR)}),
+                (
+                    method,
+                    'start_date',
+                    {'duration': (INVALID_STR, VALID_DATE)},
+                ),
+                (
+                    method,
+                    'end_date',
+                    {'duration': (VALID_DATE, INVALID_STR)},
+                ),
             ]
             value_error_test_methods += [method]
     if 'filters' in METHOD_PARAMS[method]:
@@ -107,14 +117,17 @@ load_dotenv(Path(expanduser(TOKEN_PATH)), override=True)
 
 
 @pytest.fixture(scope='module')
-def dw_methods():
-    with DataWarehouse(VALID_XDMOD_URL) as dw:
+def dw_methods(request):
+    xdmod_host = VALID_XDMOD_HOST
+    if hasattr(request, 'param'):
+        xdmod_host = request.param
+    with DataWarehouse(xdmod_host) as dw:
         yield __get_dw_methods(dw)
 
 
 @pytest.fixture(scope='module')
 def dw_methods_outside_runtime_context():
-    dw = DataWarehouse(VALID_XDMOD_URL)
+    dw = DataWarehouse(VALID_XDMOD_HOST)
     return __get_dw_methods(dw)
 
 
@@ -152,16 +165,7 @@ def test_KeyError(dw_methods, method, params, match):
 
 @pytest.mark.parametrize(
     'method',
-    [
-        'get_data',
-        'get_raw_data',
-        'describe_realms',
-        'describe_metrics',
-        'describe_dimensions',
-        'get_filter_values',
-        'describe_raw_realms',
-        'describe_raw_fields',
-    ],
+    list(METHOD_PARAMS.keys()),
 )
 def test_RuntimeError_outside_context(
     dw_methods_outside_runtime_context,
@@ -248,7 +252,7 @@ def __test_DataFrame_return_value(
 
 
 get_data_return_value_test_params = {
-    'duration': ('2020-01-01', '2020-01-31'),
+    'duration': ('2016-12-22', '2017-01-31'),
     'realm': 'Jobs',
     'metric': 'Number of Users: Active',
     'dimension': 'None',
@@ -264,25 +268,25 @@ get_data_return_value_test_params = {
         (
             {},
             'Metric',
-            31,
+            11,
         ),
         (
-            {'filters': {'Service Provider': 'StonyBrook'}},
+            {'filters': {'Resource': 'robertson'}},
             'Metric',
-            0,
+            6,
         ),
         (
             {'dimension': 'Resource'},
             'Resource',
-            31,
+            11,
         ),
         (
             {
                 'dimension': 'Resource',
-                'filters': {'Service Provider': 'StonyBrook'}
+                'filters': {'Resource': 'robertson'},
             },
             'Resource',
-            0,
+            6,
         ),
     ],
     ids=(
@@ -338,22 +342,22 @@ get_data_aggregate_return_value_test_params = {
             1,
         ),
         (
-            {'filters': {'Service Provider': 'StonyBrook'}},
+            {'filters': {'Resource': 'robertson'}},
             None,
             1,
         ),
         (
             {'dimension': 'Resource'},
             'Resource',
-            8,
+            5,
         ),
         (
             {
                 'dimension': 'Resource',
-                'filters': {'Service Provider': 'StonyBrook'}
+                'filters': {'Resource': 'robertson'},
             },
             'Resource',
-            0,
+            1,
         ),
     ],
     ids=(
@@ -439,3 +443,18 @@ def test_case_insensitive(dw_methods, method, param, value1, value2):
     data1 = __run_method(dw_methods, method, {param: value1})
     data2 = __run_method(dw_methods, method, {param: value2})
     assert data1.equals(data2)
+
+
+@pytest.mark.parametrize(
+    'dw_methods,method',
+    [
+        (
+            VALID_XDMOD_HOST + '/',
+            method,
+        ) for method in list(METHOD_PARAMS.keys())
+    ],
+    indirect=['dw_methods'],
+    ids=[method for method in list(METHOD_PARAMS.keys())],
+)
+def test_trailing_slashes(dw_methods, method):
+    __run_method(dw_methods, method)
