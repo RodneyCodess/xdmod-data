@@ -25,10 +25,10 @@ def _validate_get_data_params(data_warehouse, descriptors, params):
         results['realm'],
         params['metric'],
     )
-    results['dimension'] = _find_dimension_id(
+    results['group_by'] = _find_dimension_id(
         descriptors,
         results['realm'],
-        params['dimension'],
+        params['group_by'],
     )
     results['filters'] = __validate_filters(
         data_warehouse,

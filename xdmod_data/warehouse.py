@@ -67,7 +67,7 @@ class DataWarehouse:
         duration='Previous month',
         realm='Jobs',
         metric='CPU Hours: Total',
-        dimension='None',
+        group_by='None',
         filters={},
         dataset_type='timeseries',
         aggregation_unit='Auto',
@@ -76,25 +76,25 @@ class DataWarehouse:
 
            If `dataset_type` is 'timeseries', a Pandas DataFrame is returned.
            The data in the DataFrame are the float64 values for the
-           corresponding values of time, `metric`, and `dimension`. Missing
+           corresponding values of time, `metric`, and `group_by`. Missing
            values are filled in with the value `np.nan`. In the DataFrame, the
            index is a DatetimeIndex with the name 'Time' that contains the time
            values for the given `duration` in increments determined by
-           `aggregation_unit`. If `dimension` is 'None', the DataFrame columns
+           `aggregation_unit`. If `group_by` is 'None', the DataFrame columns
            are an index named 'Metric' whose datum is the label of the given
-           `metric`. If `dimension` is not 'None', the DataFrame columns are an
-           index whose name is the label of the given `dimension` and whose
-           data are the labels of each of the values of the given `dimension`.
+           `metric`. If `group_by` is not 'None', the DataFrame columns are an
+           index whose name is the label of the given `group_by` and whose
+           data are the labels of each of the values of the given `group_by`.
 
            If `dataset_type` is 'aggregate', a Pandas Series is returned. The
            data in the Series are the float64 values for the corresponding
-           value of `dimension`. Missing values are filled in with the value
-           `np.nan`. If `dimension` is 'None', the Series is unnamed, and the
+           value of `group_by`. Missing values are filled in with the value
+           `np.nan`. If `group_by` is 'None', the Series is unnamed, and the
            index is unnamed and contains only the label of the given `metric`.
-           If `dimension` is not 'None', the name of the Series is the label of
+           If `group_by` is not 'None', the name of the Series is the label of
            the given `metric`, the name of the index is the label of the given
-           `dimension`, and the index contains the labels of each of the values
-           of the given `dimension`.
+           `group_by`, and the index contains the labels of each of the values
+           of the given `group_by`.
 
            Parameters
            ----------
@@ -109,8 +109,8 @@ class DataWarehouse:
            metric : str, optional
                A metric in the given realm of the data warehouse. Can be
                specified by its ID or its label. See `describe_metrics()`.
-           dimension : str, optional
-               A dimension of the given realm in the data warehouse. Can be
+           group_by : str, optional
+               A dimension by which the data are grouped. Can be
                specified by its ID or its label. See `describe_dimensions()`.
            filters : mapping, optional
                A mapping of dimensions to their possible values. Results will
