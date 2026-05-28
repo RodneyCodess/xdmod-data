@@ -15,7 +15,7 @@ jobs:
             #command: ./tests/ci/scripts/run-tests.sh
 
 workflows:
-  build_and_test:
+  workflow:
     jobs:
       - build:
           matrix:
