@@ -1,13 +1,18 @@
 version: 2.1
 jobs:
   build:
+    parameters:
+      python_version:
+        type: string
+      xdmod_image:
+        type: string
     docker:
       - image: cimg/base:current
     steps:
       - checkout
-      #- run:
-          #name: Spin up containers and test different Python versions against different XDMoD web server versions
-          #command: ./tests/ci/scripts/run-tests.sh
+        #- run:
+            #name: Spin up containers and test different Python versions against different XDMoD web server versions
+            #command: ./tests/ci/scripts/run-tests.sh
 
 workflows:
   build_and_test:
@@ -15,5 +20,5 @@ workflows:
       - build:
           matrix:
             parameters:
-              python_version: ['3.8', '3.14']
-              xdmod_image: ['tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03']
+              python_version: ["3.8", "3.14"]
+              xdmod_image: ["tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"]
