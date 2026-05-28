@@ -15,7 +15,7 @@ METHOD_PARAMS = {
         'duration',
         'realm',
         'metric',
-        'dimension',
+        'group_by',
         'filters',
         'dataset_type',
         'aggregation_unit',
@@ -42,6 +42,7 @@ VALID_VALUES = {
   'realm': 'Jobs',
   'metric': 'CPU Hours: Total',
   'dimension': VALID_DIMENSION,
+  'group_by': VALID_DIMENSION,
   'filters': {VALID_DIMENSION: 'phillips'},
   'dataset_type': 'timeseries',
   'aggregation_unit': 'Auto',
@@ -54,7 +55,8 @@ KEY_ERROR_TEST_VALUES_AND_MATCHES = {
     'duration': (INVALID_STR, 'Invalid value for `duration`'),
     'realm': (INVALID_STR, r'Realm .* not found'),
     'metric': (INVALID_STR, r'Metric .* not found'),
-    'dimension': (INVALID_STR, r'Dimension .* not found'),
+    'dimension': (INVALID_STR, r'Dimension .* not found')
+    'group_by': (INVALID_STR, r'Dimension .* not found'),
     'filter_key': ({INVALID_STR: INVALID_STR}, r'Dimension .* not found'),
     'filter_value': (
         {VALID_DIMENSION: INVALID_STR},
@@ -275,7 +277,7 @@ get_data_return_value_test_params = {
     'duration': ('2016-12-22', '2017-01-31'),
     'realm': 'Jobs',
     'metric': 'Number of Users: Active',
-    'dimension': 'None',
+    'group_by': 'None',
     'filters': {},
     'dataset_type': 'timeseries',
     'aggregation_unit': 'Day',
@@ -296,13 +298,13 @@ get_data_return_value_test_params = {
             6,
         ),
         (
-            {'dimension': 'Resource'},
+            {'group_by': 'Resource'},
             'Resource',
             11,
         ),
         (
             {
-                'dimension': 'Resource',
+                'group_by': 'Resource',
                 'filters': {'Resource': 'robertson'},
             },
             'Resource',
@@ -310,10 +312,10 @@ get_data_return_value_test_params = {
         ),
     ],
     ids=(
-        'no_dimension,not_empty',
-        'no_dimension,empty',
-        'dimension,not_empty',
-        'dimension,empty',
+        'no_group_by,not_empty',
+        'no_group_by,empty',
+        'group_by,not_empty',
+        'group_by,empty',
     ),
 )
 def test_get_data_timeseries_return_value(
@@ -329,7 +331,7 @@ def test_get_data_timeseries_return_value(
     else:
         columns_data = dw_methods['get_filter_values'](
             params['realm'],
-            params['dimension'],
+            params['group_by'],
         )['label'].to_list()
         columns_data_subset = True
     __test_DataFrame_return_value(
@@ -367,13 +369,13 @@ get_data_aggregate_return_value_test_params = {
             1,
         ),
         (
-            {'dimension': 'Resource'},
+            {'group_by': 'Resource'},
             'Resource',
             5,
         ),
         (
             {
-                'dimension': 'Resource',
+                'group_by': 'Resource',
                 'filters': {'Resource': 'robertson'},
             },
             'Resource',
@@ -381,10 +383,10 @@ get_data_aggregate_return_value_test_params = {
         ),
     ],
     ids=(
-        'no_dimension,not_empty',
-        'no_dimension,empty',
-        'dimension,not_empty',
-        'dimension,empty',
+        'no_group_by,not_empty',
+        'no_group_by,empty',
+        'group_by,not_empty',
+        'group_by,empty',
     ),
 )
 def test_get_data_aggregate_return_value(
@@ -407,7 +409,7 @@ def test_get_data_aggregate_return_value(
         assert series.name == params['metric']
         dimension_values = dw_methods['get_filter_values'](
             params['realm'],
-            params['dimension'],
+            params['group_by'],
         )['label'].to_list()
         assert series.index.to_list().sort() == dimension_values.sort()
     assert isinstance(series.index, pandas.core.indexes.base.Index)

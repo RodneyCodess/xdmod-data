@@ -85,7 +85,7 @@ def _find_dimension_id(descriptors, realm, dimension):
     return __find_metric_or_dimension_id(
         descriptors,
         realm,
-        'dimension',
+        'group_by',
         dimension,
     )
 

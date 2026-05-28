@@ -212,7 +212,7 @@ class _HttpRequester:
             'end_date': params['end_date'],
             'realm': params['realm'],
             'statistic': params['metric'],
-            'group_by': params['dimension'],
+            'group_by': params['group_by'],
             'dataset_type': params['dataset_type'],
             'aggregation_unit': params['aggregation_unit'],
             'format': 'csv',
