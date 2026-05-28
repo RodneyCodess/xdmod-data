@@ -4,6 +4,8 @@ jobs:
     parameters:
       python_version:
         type: string
+      xdmod_version:
+        type: string
       xdmod_image:
         type: string
     docker:
@@ -21,4 +23,5 @@ workflows:
           matrix:
             parameters:
               python_version: ["3.8", "3.14"]
+              xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
               xdmod_image: ["tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"]
