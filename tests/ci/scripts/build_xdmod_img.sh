@@ -8,7 +8,7 @@ PROJECT_DIR=$BASE_DIR/../../..
 
 BASE_IMAGE="tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
 
-docker pull $"BASE_IMAGE"
+docker pull "$BASE_IMAGE"
 
 IMAGE_TO_SAVE="$BASE_IMAGE"
 
