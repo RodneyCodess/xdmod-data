@@ -1,27 +1,63 @@
 version: 2.1
 jobs:
-  build:
+  build_xdmod_images:
     parameters:
-      python_version:
-        type: string
       xdmod_version:
         type: string
-      xdmod_image:
-        type: string
-    docker:
-      - image: cimg/base:current
+    machine: True
     steps:
       - checkout
-        #- run:
-            #name: Spin up containers and test different Python versions against different XDMoD web server versions
-            #command: ./tests/ci/scripts/run-tests.sh
+      - run:
+          name: Build XDMoD web server images
+          command: ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
 
 workflows:
   workflow:
     jobs:
-      - build:
+      - build_xdmod_images:
           matrix:
             parameters:
-              python_version: ["3.8", "3.14"]
               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
-              xdmod_image: ["tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"]
+
+
+
+#   build_docker:
+#     parameters:
+#       python_version:
+#         type: string
+#       xdmod_version:
+#         type: string
+#       xdmod_image:
+#         type: string
+#     docker:
+#       - image: cimg/base:current
+#     steps:
+#       - checkout
+#         #- run:
+#             #name: Spin up containers and test different Python versions against different XDMoD web server versions
+#             #command: ./tests/ci/scripts/run-tests.sh
+#   build_VM-machine:
+#     parameters:
+#       xdmod_version:
+#         type: string
+#     machine:
+#       image: ubuntu-2204:current
+#     steps:
+#       - checkout
+#       #- run:
+#           #name: spin up containers and test different python versions against xdmod-data
+#           #command : ./tests/ci/scripts/step1.sh "<< parameters.xdmod_version >>"
+
+
+# workflows:
+#   workflow:
+#     jobs:
+#       - build_docker:
+#           matrix:
+#             parameters:
+#               python_version: ["3.8", "3.14"]
+#               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
+#               xdmod_image: ["tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"]
+#       - build_VM-machine:
+#         parameters:
+#           xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
