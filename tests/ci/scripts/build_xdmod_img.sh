@@ -1,13 +1,18 @@
+ #!/bin/bash
+set -eo pipefail
 
-`set -eo pipefail`
+XDMOD_VERSION="$1"
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR=$BASE_DIR/../../..
 
 docker pull "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
 
-if [ "$XDMOD_VERSION" = "xdmod-main-dev" || "$XDMOD_VERSION" = "xdmod-11-0-dev" ]; then
-    if [ "$XDMOD_VERSION" = 'xdmod-main-dev' ]; then
+docker run -d --name "$XDMOD_VERSION" -h "$XDMOD_VERSION" \
+    "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
+
+if [ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-dev" ]; then
+    if [ "$XDMOD_VERSION" == 'xdmod-main-dev' ]; then
             branch='main'
         else
             branch="xdmod$(echo $XDMOD_VERSION | sed 's/xdmod-\(.*\)-dev/\1/' | sed 's/-/./')"

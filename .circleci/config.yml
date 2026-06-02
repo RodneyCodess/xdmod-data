@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run:
           name: Build XDMoD web server images
-          command: ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
+          command: bash ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
 
 workflows:
   workflow:
