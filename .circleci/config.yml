@@ -4,12 +4,17 @@ jobs:
     parameters:
       xdmod_version:
         type: string
-    machine: True
+    machine:
+      image: ubuntu-2204:current
     steps:
       - checkout
       - run:
           name: Build XDMoD web server images
           command: bash ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - << parameters.xdmod_version >>.tar
 
 workflows:
   workflow:
