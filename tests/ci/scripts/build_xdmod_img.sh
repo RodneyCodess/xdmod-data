@@ -20,8 +20,7 @@ if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-de
         branch="xdmod$(echo $XDMOD_VERSION | sed 's/xdmod-\(.*\)-dev/\1/' | sed 's/-/./')"
     fi
 
-    docker run -dt --name "$XDMOD_VERSION" -h "$XDMOD_VERSION" 
-        "$BASE_IMAGE"
+    docker run -dt --name "$XDMOD_VERSION" -h "$XDMOD_VERSION" "$BASE_IMAGE"
 
     docker exec $XDMOD_VERSION bash -c "git clone --depth=1 --branch=$branch https://github.com/ubccr/xdmod.git /root/xdmod"
     docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'composer install'
