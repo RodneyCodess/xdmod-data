@@ -15,6 +15,22 @@ jobs:
           root: .
           paths:
             - << parameters.xdmod_version >>.tar
+  run_tests:
+    parameters:
+      xdmod_version:
+        type: string
+      python_version:
+        type: string
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Run tests against XDMoD web server image
+          command: bash ./tests/ci/scripts/run_tests.sh "<< parameters.xdmod_version >>" "<< parameters.python_version >>"
+
 
 workflows:
   workflow:
@@ -23,6 +39,13 @@ workflows:
           matrix:
             parameters:
               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
+      - run_tests:
+          requires:
+            - build_xdmod_images
+          matrix:
+            parameters:
+              xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
+              python_version: ["3.8", "3.14"]
 
 
 
