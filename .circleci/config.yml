@@ -22,7 +22,7 @@ jobs:
       python_version:
         type: string
     machine:
-      cimg/python:<< parameters.python_version >>
+      image: ubuntu-2204:current
     steps:
       - checkout
       - attach_workspace:
