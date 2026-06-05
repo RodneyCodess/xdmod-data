@@ -34,7 +34,7 @@ if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-de
         docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'sed -i "/^confirmResourceSpecs/d" tests/ci/scripts/xdmod-upgrade.tcl'
     fi
     docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'XDMOD_TEST_MODE=upgrade bash -x ./tests/ci/bootstrap.sh'
-    docker exec -w /root/xdmod $XDMOD_VERSION bash -c './tests/ci/validate.sh' || true
+    
 
     docker commit "$XDMOD_VERSION" "$XDMOD_VERSION:built"
     IMAGE_TO_SAVE="$XDMOD_VERSION:built"
