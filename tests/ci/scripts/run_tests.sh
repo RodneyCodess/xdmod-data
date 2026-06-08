@@ -8,6 +8,9 @@ docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
 
 docker exec $XDMOD_VERSION bash -c '~/root/bin/services start'
 
+
+curl -k https://localhost:8080
+
 echo "$loaded_image"
 
 python3 -m pip install --upgrade pip
@@ -58,6 +61,7 @@ docker exec \
             -e XDMOD_VERSION="$XDMOD_VERSION" \
             $PYTHON_VERSION \
             bash -c 'python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/'
+
 python3 -m pip freeze
 
 
