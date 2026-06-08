@@ -30,13 +30,13 @@ if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-de
     fi
     docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'XDMOD_TEST_MODE=upgrade bash -x ./tests/ci/bootstrap.sh'
     
-    docker commit "$XDMOD_VERSION" "$XDMOD_VERSION:built"
+    #docker commit "$XDMOD_VERSION" "$XDMOD_VERSION:built"
     
 else
     docker run -dt --name "$XDMOD_VERSION" -h "$XDMOD_VERSION" "$BASE_IMAGE"
 fi
 
-docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
+docker exec $XDMOD_VERSION bash -c '/root/bin/services restart'
 
 docker cp $PROJECT_DIR/tests/ci/artifacts/10000users.log $XDMOD_VERSION:.
 docker exec $XDMOD_VERSION xdmod-shredder -r frearson -f slurm -i 10000users.log
@@ -47,4 +47,5 @@ docker exec $XDMOD_VERSION xdmod-ingestor --aggregate=job --last-modified-start-
 
 docker commit "$XDMOD_VERSION" "$XDMOD_VERSION:built"
 IMAGE_TO_SAVE="$XDMOD_VERSION:built"
+
 docker save -o "$PROJECT_DIR/$XDMOD_VERSION.tar" "$IMAGE_TO_SAVE"
