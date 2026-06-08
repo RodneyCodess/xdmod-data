@@ -6,8 +6,8 @@ docker load -i "$XDMOD_VERSION.tar" && docker images
 loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
 docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
 
-curl -k https://localhost:8080
- 
+docker exec $XDMOD_VERSION bash -c '~/root/bin/services start'
+
 echo "$loaded_image"
 
 python3 -m pip install --upgrade pip
@@ -26,8 +26,27 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
 
-#pytest --cov=my_project
-python3 -m pip freeze 
+rest_token=$(docker exec \
+        -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
+        $PYTHON_VERSION \
+        bash -c "curl \
+            -sS \
+            -X POST \
+            -c xdmod.cookie \
+            -d 'username=normaluser&password=normaluser' \
+            https://$xdmod_container/rest/auth/login \
+            | jq -r '.results.token'"
+    )
+
+echo $rest_token
+
+docker exec \
+            -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
+            -e XDMOD_HOST="https://localhost:8080" \
+            -e XDMOD_VERSION="$XDMOD_VERSION" \
+            $PYTHON_VERSION \
+            bash -c 'python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/'
+python3 -m pip freeze
 
 
 

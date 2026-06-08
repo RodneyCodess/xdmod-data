@@ -41,19 +41,3 @@ if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-de
 fi
 
 docker save -o "$PROJECT_DIR/$XDMOD_VERSION.tar" "$IMAGE_TO_SAVE"
-# Update the server hostnames and certificates so the Python containers can
-# make requests to them.
-#docker exec $XDMOD_VERSION bash -c "sed -i 's/localhost/$XDMOD_VERSION/g' /etc/httpd/conf.d/xdmod.conf"
-# (Re)start the XDMoD-related services.
-#docker exec $XDMOD_VERSION bash -c '/root/bin/services restart'
-# Copy the 10,000 users file into the container and shred it.
-# We use this file so we can test filters with more than 10,000
-# values and date ranges that span multiple quarters.
-# docker cp $PROJECT_DIR/tests/ci/artifacts/10000users.log $XDMOD_VERSION:.
-# docker exec $XDMOD_VERSION xdmod-shredder -r frearson -f slurm -i 10000users.log
-# # Ingest and aggregate.
-# date=$(date --utc +%Y-%m-%d)
-# docker exec $XDMOD_VERSION xdmod-ingestor --ingest
-# docker exec $XDMOD_VERSION xdmod-ingestor --aggregate=job --last-modified-start-date $date
-# # Copy certificate (for doing requests) from the XDMoD container.
-# #docker cp $XDMOD_VERSION:/etc/pki/tls/certs/$XDMOD_VERSION.crt $PROJECT_DIR
