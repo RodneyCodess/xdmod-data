@@ -28,38 +28,18 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
 
-rest_token=$(docker exec \
-        -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
-        $PYTHON_VERSION \
-        bash -c "curl \
-            -sS \
-            -X POST \
-            -c xdmod.cookie \
-            -d 'username=normaluser&password=normaluser' \
-            https://$XDMOD_VERSION/rest/auth/login \
-            | jq -r '.results.token'"
+rest_token=$(
+    curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://$XDMOD_VERSION/rest/auth/login | 
+    jq -r '.results.token'
     )
 
-api_token=$(docker exec \
-        -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
-        $PYTHON_VERSION \
-        bash -c "curl \
-            -sS \
-            -X POST \
-            -b xdmod.cookie \
-            https://$XDMOD_VERSION/rest/users/current/api/token?token=$rest_token \
-            | jq -r '.data.token'"
-    )
-    echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
+api_token=$(curl -sS -X POST -b xdmod.cookie "https://$XDMOD_VERSION/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+
+echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
+
+XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/
 
 
-
-docker exec \
-            -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
-            -e XDMOD_HOST="https://localhost:8080" \
-            -e XDMOD_VERSION="$XDMOD_VERSION" \
-            $PYTHON_VERSION \
-            bash -c 'python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/'
 
 python3 -m pip freeze
 
