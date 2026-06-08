@@ -36,6 +36,8 @@ else
     docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
 fi
 
+docker ps -a
+
 docker cp $PROJECT_DIR/tests/ci/artifacts/10000users.log $XDMOD_VERSION:.
 docker exec $XDMOD_VERSION xdmod-shredder -r frearson -f slurm -i 10000users.log
 # Ingest and aggregate.
