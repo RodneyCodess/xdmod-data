@@ -1,5 +1,5 @@
  #!/bin/bash
-set -eo pipefail
+set -exo pipefail
 
 docker load -i "$XDMOD_VERSION.tar" && docker images 
 
@@ -7,8 +7,6 @@ loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
 docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
 
 docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
-
-#curl -k https://localhost:8080
 
 echo "$loaded_image"
 
@@ -29,16 +27,15 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
 fi
 
 rest_token=$(
-    curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://$XDMOD_VERSION/rest/auth/login | 
+    curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
     jq -r '.results.token'
     )
 
-api_token=$(curl -sS -X POST -b xdmod.cookie "https://$XDMOD_VERSION/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+api_token=$(curl -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
 echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
 
 XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/
-
 
 
 python3 -m pip freeze

@@ -12,7 +12,6 @@ docker pull "$BASE_IMAGE"
 
 IMAGE_TO_SAVE="$BASE_IMAGE"
 
-
 if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-dev" ]]; then
     if [ "$XDMOD_VERSION" == 'xdmod-main-dev' ]; then
         branch='main'
@@ -25,17 +24,12 @@ if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-de
     docker exec $XDMOD_VERSION bash -c "git clone --depth=1 --branch=$branch https://github.com/ubccr/xdmod.git /root/xdmod"
     docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'composer install'
     docker exec -w /root/xdmod $XDMOD_VERSION bash -c '/root/bin/buildrpm xdmod'
-    # Work around the fact that the 11.0 version of bootstrap.sh contains
-    # an extra prompt in xdmod-upgrade.tcl for upgrading from 10.5 to 11.0,
-    # and in this case we are upgrading from an earlier version of 11.0 to
-    # the latest development version of 11.0, so that prompt should not be
-    # expected.
+    
     if [ "$XDMOD_VERSION" == 'xdmod-11-0-dev' ]; then
         docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'sed -i "/^confirmResourceSpecs/d" tests/ci/scripts/xdmod-upgrade.tcl'
     fi
     docker exec -w /root/xdmod $XDMOD_VERSION bash -c 'XDMOD_TEST_MODE=upgrade bash -x ./tests/ci/bootstrap.sh'
     
-
     docker commit "$XDMOD_VERSION" "$XDMOD_VERSION:built"
     IMAGE_TO_SAVE="$XDMOD_VERSION:built"
 fi
