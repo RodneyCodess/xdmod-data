@@ -8,8 +8,7 @@ docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
 
 docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
 
-
-curl -k https://localhost:8080
+#curl -k https://localhost:8080
 
 echo "$loaded_image"
 
