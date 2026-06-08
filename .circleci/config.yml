@@ -50,9 +50,11 @@ jobs:
           name: what python is here
           command: |
             python3 --version || true
-            python3.8 --version || true
-            which -a python3 python3.8 || true
-
+            python3.14 --version || true
+            which -a python3 python3.14 || true
+            pyenv versions || true
+            pyenv install --list | grep 3.14 || true
+            
 workflows:
   workflow:
     jobs:
