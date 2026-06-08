@@ -32,6 +32,16 @@ if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-de
     
     docker commit "$XDMOD_VERSION" "$XDMOD_VERSION:built"
     IMAGE_TO_SAVE="$XDMOD_VERSION:built"
+else
+    docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
 fi
 
+docker cp $PROJECT_DIR/tests/ci/artifacts/10000users.log $XDMOD_VERSION:.
+docker exec $XDMOD_VERSION xdmod-shredder -r frearson -f slurm -i 10000users.log
+# Ingest and aggregate.
+date=$(date --utc +%Y-%m-%d)
+docker exec $XDMOD_VERSION xdmod-ingestor --ingest
+docker exec $XDMOD_VERSION xdmod-ingestor --aggregate=job --last-modified-start-date $date
+
+#save
 docker save -o "$PROJECT_DIR/$XDMOD_VERSION.tar" "$IMAGE_TO_SAVE"
