@@ -41,30 +41,10 @@ jobs:
       - run:
           name: Run tests against XDMoD web server image
           command: bash ./tests/ci/scripts/run_tests.sh
-  
-  throw-away-job:
-    machine:
-      image: ubuntu-2004:2024.11.1
-    steps:
-      - run:
-          name: identify image and python
-          command: |
-            echo "=== image / OS ==="
-            cat /etc/os-release | grep PRETTY_NAME || true
-            uname -a || true
-            echo "=== default python ==="
-            python3 --version || true
-            which -a python3 || true
-            echo "=== pyenv ==="
-            pyenv versions || true
-            echo "=== env vars passed in ==="
-            echo "PYTHON_VERSION=$PYTHON_VERSION"
-            echo "XDMOD_VERSION=$XDMOD_VERSION"
-            pyenv install --list | grep 3.8
+
 workflows:
   workflow:
     jobs:
-      - throw-away-job
       - build_xdmod_images:
           matrix:
             parameters:

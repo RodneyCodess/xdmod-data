@@ -19,6 +19,11 @@ python3 -m pip install --upgrade python-dotenv pytest pytest-cov
 # The minimum version of each dependency should be tested in the
 # container with the minimum Python version.
 if [ "$PYTHON_VERSION" = "min-python" ]; then
+
+    pyenv install -s 3.8
+    pyenv global 3.8
+    python3 --version
+    
     min_dependency_versions=$(awk \
         '/install_requires/ {flag=1} flag && !/install_requires/ && NF {print $0} flag && /^\[.*\]$/ {flag=0}' \
         setup.cfg | tr -d '\n' | sed 's/ >= /==/g'
