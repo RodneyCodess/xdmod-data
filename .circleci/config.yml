@@ -44,7 +44,7 @@ jobs:
   
   throw-away-job:
     machine:
-      image: ubuntu-2604:2026.05.1
+      image: ubuntu-2004:2024.11.1
     steps:
       - run:
           name: identify image and python
@@ -60,6 +60,7 @@ jobs:
             echo "=== env vars passed in ==="
             echo "PYTHON_VERSION=$PYTHON_VERSION"
             echo "XDMOD_VERSION=$XDMOD_VERSION"
+            pyenv install --list | grep 3.8
 workflows:
   workflow:
     jobs:
