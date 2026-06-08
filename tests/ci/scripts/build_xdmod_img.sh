@@ -13,8 +13,8 @@ docker pull "$BASE_IMAGE"
 IMAGE_TO_SAVE="$BASE_IMAGE"
 
 # Generate OpenSSL key and certificate.
-docker exec $xdmod_container bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/$xdmod_container.key"
-docker exec $xdmod_container bash -c "openssl req -new -key /etc/pki/tls/private/$xdmod_container.key -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req -out /etc/pki/tls/certs/$xdmod_container.crt -subj '/C=XX/L=Default City/O=Default Company Ltd/CN=localhost' -addext 'subjectAltName=DNS:localhost'"
+docker exec $xdmod_container bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
+docker exec $xdmod_container bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req -out /etc/pki/tls/certs/localhost.crt -subj '/C=XX/L=Default City/O=Default Company Ltd/CN=localhost' -addext 'subjectAltName=DNS:localhost'"
     
 
 if [[ "$XDMOD_VERSION" == "xdmod-main-dev" || "$XDMOD_VERSION" == "xdmod-11-0-dev" ]]; then
