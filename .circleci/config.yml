@@ -2,11 +2,11 @@ version: 2.1
 
 executors:
   min-python:
-    docker:
-      - image: cimg/python:3.8
+    machine:
+      image: ubuntu-2004:2024.11.1
   max-python:
-    docker:
-      - image: cimg/python:3.14
+    machine:
+      image: ubuntu-2604:2026.05.1
 
 jobs:
   build_xdmod_images:
@@ -35,17 +35,28 @@ jobs:
       PYTHON_VERSION: << parameters.python_version >>
     executor: << parameters.python_version >>
     steps:
-      - setup_remote_docker 
       - checkout
       - attach_workspace:
           at: .
       - run:
           name: Run tests against XDMoD web server image
-          command: bash ./tests/ci/scripts/run_tests.sh 
+          command: bash ./tests/ci/scripts/run_tests.sh
+  
+  throw-away-job:
+    machine:
+      image: ubuntu-2004:2024.11.1
+    steps:
+      - run:
+          name: what python is here
+          command: |
+            python3 --version || true
+            python3.8 --version || true
+            which -a python3 python3.8 || true
 
 workflows:
   workflow:
     jobs:
+      - throw-away-job
       - build_xdmod_images:
           matrix:
             parameters:
