@@ -34,11 +34,23 @@ rest_token=$(docker exec \
             -X POST \
             -c xdmod.cookie \
             -d 'username=normaluser&password=normaluser' \
-            https://$xdmod_container/rest/auth/login \
+            https://$XDMOD_VERSION/rest/auth/login \
             | jq -r '.results.token'"
     )
 
-echo $rest_token
+api_token=$(docker exec \
+        -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
+        $PYTHON_VERSION \
+        bash -c "curl \
+            -sS \
+            -X POST \
+            -b xdmod.cookie \
+            https://$XDMOD_VERSION/rest/users/current/api/token?token=$rest_token \
+            | jq -r '.data.token'"
+    )
+    echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
+
+
 
 docker exec \
             -e CURL_CA_BUNDLE="/home/circleci/project/$XDMOD_VERSION.crt" \
