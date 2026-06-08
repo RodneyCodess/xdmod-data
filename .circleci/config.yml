@@ -44,17 +44,22 @@ jobs:
   
   throw-away-job:
     machine:
-      image: ubuntu-2604:2026.05.1
+      image: ubuntu-2004:2024.11.1
     steps:
       - run:
-          name: what python is here
+          name: identify image and python
           command: |
+            echo "=== image / OS ==="
+            cat /etc/os-release | grep PRETTY_NAME || true
+            uname -a || true
+            echo "=== default python ==="
             python3 --version || true
-            python3.14 --version || true
-            which -a python3 python3.14 || true
+            which -a python3 || true
+            echo "=== pyenv ==="
             pyenv versions || true
-            pyenv install --list | grep 3.14 || true
-            
+            echo "=== env vars passed in ==="
+            echo "PYTHON_VERSION=$PYTHON_VERSION"
+            echo "XDMOD_VERSION=$XDMOD_VERSION"
 workflows:
   workflow:
     jobs:
