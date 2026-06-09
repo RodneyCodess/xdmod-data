@@ -41,6 +41,20 @@ jobs:
       - run:
           name: Run tests against XDMoD web server image
           command: bash ./tests/ci/scripts/run_tests.sh
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .coverage.*
+  coverage_report:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Generate coverage report
+          command: bash ./tests/ci/scripts/generate_coverage_report.sh
 
 workflows:
   workflow:
@@ -56,6 +70,11 @@ workflows:
             parameters:
               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
               python_version: ["min-python", "max-python"]
+      - coverage_report:
+          requires:
+            - build_xdmod_images
+            - run_tests
+
 
 
 
