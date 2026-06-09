@@ -5,8 +5,15 @@ docker load -i "$XDMOD_VERSION.tar" && docker images
 
 loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
 docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
-
 docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
+
+#generate certs and copy 
+docker exec "$XDMOD_VERSION" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
+docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req -out /etc/pki/tls/certs/localhost.crt -subj '/C=XX/L=Default City/O=Default Company Ltd/CN=localhost' -addext 'subjectAltName=DNS:localhost'"
+
+docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
+
+docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 
 
 if [ "$PYTHON_VERSION" = "min-python" ]; then

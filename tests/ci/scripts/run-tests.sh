@@ -129,3 +129,24 @@ for python_container in $python_containers; do
     # Make sure 100% test coverage.
     docker exec $python_container bash -c 'python3 -m coverage report -m --fail-under=100'
 done
+
+
+
+
+
+
+
+
+
+docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
+docker exec "$XDMOD_VERSION" bash -c '/root/bin/services start'
+
+# --- cert setup ---
+# 1. generate a cert INSIDE the container, for hostname "localhost"
+
+
+# 2. restart services so httpd picks up the new cert
+docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
+
+# 3. copy the cert OUT of the container so curl/pytest on the host can verify against it
+docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
