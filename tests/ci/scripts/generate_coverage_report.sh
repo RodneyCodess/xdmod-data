@@ -16,4 +16,4 @@ ls -la .coverage.* || true
 echo "PYTHON_VERSION IS !!!!! -> : [$PYTHON_VERSION]"
 
 python3 -m coverage combine .coverage.${PYTHON_VERSION}.*
-python3 -m coverage report -m
+python3 -m coverage report -m --fail-under=100
