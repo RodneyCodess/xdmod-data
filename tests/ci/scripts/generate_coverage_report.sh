@@ -13,6 +13,8 @@ python3 -m pip install --upgrade coverage
 
 ls -la .coverage.* || true
 
+echo "PYTHON_VERSION IS !!!!! -> : [$PYTHON_VERSION]"
+
 coverage combine .coverage.${PYTHON_VERSION}.*
 
 coverage report -m
