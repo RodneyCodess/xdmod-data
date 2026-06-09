@@ -15,6 +15,5 @@ ls -la .coverage.* || true
 
 echo "PYTHON_VERSION IS !!!!! -> : [$PYTHON_VERSION]"
 
-coverage combine .coverage.${PYTHON_VERSION}.*
-
-coverage report -m
+python3 -m coverage combine .coverage.${PYTHON_VERSION}.*
+python3 -m coverage report -m
