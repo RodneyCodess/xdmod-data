@@ -4,7 +4,7 @@ set -exo pipefail
 
 if [ "$PYTHON_VERSION" = "min-python" ]; then
     pyenv global 3.8
-else
+fi
 
 python3 -m pip install --upgrade coverage
 
