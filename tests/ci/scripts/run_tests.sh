@@ -20,7 +20,8 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     pyenv install -s 3.8
     pyenv global 3.8
 fi
-python3 --version   
+
+echo "CURL_CA_BUNDLE is: [$CURL_CA_BUNDLE]"
 
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade flake8 flake8-commas flake8-quotes
