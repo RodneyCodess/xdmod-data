@@ -14,7 +14,6 @@ docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private
 docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
-export CURL_CA_BUNDLE="$(pwd)/localhost.crt"
 
 
 if [ "$PYTHON_VERSION" = "min-python" ]; then
@@ -39,6 +38,8 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     )
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
+
+export CURL_CA_BUNDLE="$(pwd)/localhost.crt"
 
 rest_token=$(
     curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
