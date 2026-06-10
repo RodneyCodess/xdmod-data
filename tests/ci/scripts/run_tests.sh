@@ -40,11 +40,11 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
 fi
 
 rest_token=$(
-    curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
+    curl -k -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
     jq -r '.results.token'
     )
 
-api_token=$(curl -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+api_token=$(curl -k -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
 echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
 
