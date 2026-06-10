@@ -19,9 +19,9 @@ docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 if [ "$PYTHON_VERSION" = "min-python" ]; then
     pyenv install -s 3.8
     pyenv global 3.8
+    export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 fi
 
-echo "CURL_CA_BUNDLE is: [$CURL_CA_BUNDLE]"
 
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade flake8 flake8-commas flake8-quotes
@@ -40,22 +40,15 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
 
-export CURL_CA_BUNDLE="$(pwd)/localhost.crt"
 
 rest_token=$(
-    curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
+    curl --cacert "$(pwd)/localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
     jq -r '.results.token'
     )
 
-api_token=$(curl -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+api_token=$(curl --cacert "$(pwd)/localhost.crt" -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
 echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
-
-echo " THIS IS THE API TOKEN !!!!! [$api_token]"
-
-ls -la localhost.crt && echo "pwd is $(pwd)"
-
-python3 -m pip show requests certifi urllib3
 
 CURL_CA_BUNDLE="$(pwd)/localhost.crt" XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/ || true
 
