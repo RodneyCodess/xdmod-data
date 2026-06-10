@@ -14,6 +14,7 @@ docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private
 docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
+export CURL_CA_BUNDLE="$(pwd)/localhost.crt"
 
 
 if [ "$PYTHON_VERSION" = "min-python" ]; then
