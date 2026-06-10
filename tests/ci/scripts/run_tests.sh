@@ -50,7 +50,9 @@ api_token=$(curl --cacert "$(pwd)/localhost.crt" -sS -X POST -b xdmod.cookie "ht
 
 echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
 
-CURL_CA_BUNDLE="$(pwd)/localhost.crt" XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/ || true
+echo "SSL_CERT_FILE=[$SSL_CERT_FILE] REQUESTS_CA_BUNDLE=[$REQUESTS_CA_BUNDLE] CURL_CA_BUNDLE=[$CURL_CA_BUNDLE]"
+
+REQUESTS_CA_BUNDLE="$(pwd)/localhost.crt" CURL_CA_BUNDLE="$(pwd)/localhost.crt" XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/ || true
 
 mv .coverage ".coverage.${PYTHON_VERSION}.${XDMOD_VERSION}"
 
