@@ -11,7 +11,7 @@ docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
 docker exec "$XDMOD_VERSION" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
 docker cp tests/ci/scripts/openssl.cnf $XDMOD_VERSION:/root/openssl.cnf
 
-docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 - set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
+docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
 
 docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
