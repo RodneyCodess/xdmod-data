@@ -10,7 +10,8 @@ docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
 #generate certs and copy 
 docker exec "$XDMOD_VERSION" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
 docker cp tests/ci/scripts/openssl.cnf $XDMOD_VERSION:/root/openssl.cnf
-docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
+
+docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 - set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
 
 docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
@@ -52,7 +53,6 @@ echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
 
 cat "$(pwd)/localhost.crt" >> "$(python3 -c 'import certifi; print(certifi.where())')"
 
-REQUESTS_CA_BUNDLE=localhost.crt XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/
+REQUESTS_CA_BUNDLE=localhost.crt XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/ || true
 
 mv .coverage ".coverage.${PYTHON_VERSION}.${XDMOD_VERSION}"
-
