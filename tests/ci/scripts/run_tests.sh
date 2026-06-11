@@ -17,13 +17,11 @@ docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 
-
 if [ "$PYTHON_VERSION" = "min-python" ]; then
     pyenv install -s 3.8
     pyenv global 3.8
     export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 fi
-
 
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade flake8 flake8-commas flake8-quotes
@@ -49,7 +47,6 @@ rest_token=$(
 
 
 api_token=$(CURL_CA_BUNDLE=localhost.crt curl -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
-
 
 echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
 
