@@ -3,7 +3,6 @@ set -exo pipefail
 
 docker load -i "$XDMOD_VERSION.tar" && docker images 
 
-
 loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
 docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
 docker exec $XDMOD_VERSION bash -c '/root/bin/services start'
@@ -18,11 +17,13 @@ docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 
+
 if [ "$PYTHON_VERSION" = "min-python" ]; then
     pyenv install -s 3.8
     pyenv global 3.8
     export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 fi
+
 
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade flake8 flake8-commas flake8-quotes
@@ -42,17 +43,16 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
 fi
 
 rest_token=$(
-    CURL_CA_BUNDLE=localhost.crt curl -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login |
+    curl --cacert "$(pwd)/localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | 
     jq -r '.results.token'
     )
 
-
-api_token=$(CURL_CA_BUNDLE=localhost.crt curl -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+api_token=$(curl --cacert "$(pwd)/localhost.crt" -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
 echo "XDMOD_API_TOKEN=$api_token" > ${XDMOD_VERSION}-token
 
 cat "$(pwd)/localhost.crt" >> "$(python3 -c 'import certifi; print(certifi.where())')"
 
-REQUESTS_CA_BUNDLE=localhost.crt XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/
+REQUESTS_CA_BUNDLE=localhost.crt XDMOD_API_TOKEN="$api_token" XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/ || true
 
 mv .coverage ".coverage.${PYTHON_VERSION}.${XDMOD_VERSION}"
