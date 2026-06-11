@@ -11,4 +11,3 @@ CN=localhost
 
 [v3_req]
 basicConstraints=critical,CA:TRUE
-subjectAltName=DNS:localhost
