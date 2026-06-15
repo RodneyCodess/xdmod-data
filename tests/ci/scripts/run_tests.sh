@@ -34,6 +34,10 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
 
+shellscriptecho "=== login response ==="
+curl --cacert "$(pwd)/localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login || true
+echo ""
+
 # fetch API token
 rest_token=$(curl --cacert "$(pwd)/localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | jq -r '.results.token')
 api_token=$(curl --cacert "$(pwd)/localhost.crt" -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
