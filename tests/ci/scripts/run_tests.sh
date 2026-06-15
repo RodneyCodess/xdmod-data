@@ -34,7 +34,7 @@ if [ "$PYTHON_VERSION" = "min-python" ]; then
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
 
-shellscriptecho "=== login response ==="
+echo "=== login response ==="
 curl --cacert "$(pwd)/localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login || true
 echo ""
 
