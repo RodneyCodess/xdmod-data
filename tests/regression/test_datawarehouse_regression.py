@@ -205,6 +205,9 @@ def test_get_data(valid_dw, aggregation_unit, data_file):
         index_col='Time',
         columns_name='Metric',
         dtype={'CPU Hours: Total': 'Float64'},
+        override_default_data=(
+            XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']
+        ),
     )
 
 
