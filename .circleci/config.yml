@@ -20,7 +20,7 @@ jobs:
       - checkout
       - run:
           name: Build XDMoD web server images
-          command: bash ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
+          command: ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
       - persist_to_workspace:
           root: .
           paths:
@@ -41,7 +41,7 @@ jobs:
           at: .
       - run:
           name: Run tests against XDMoD web server image
-          command: bash ./tests/ci/scripts/run_tests.sh
+          command: ./tests/ci/scripts/run_tests.sh
       - persist_to_workspace:
           root: .
           paths:
@@ -59,7 +59,7 @@ jobs:
           at: .
       - run:
           name: Generate coverage report
-          command: bash ./tests/ci/scripts/generate_coverage_report.sh
+          command: ./tests/ci/scripts/generate_coverage_report.sh
 
 workflows:
   workflow:

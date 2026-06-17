@@ -72,7 +72,7 @@ def __get_data_dir(override_default_data=False):
     [
         (
             {},
-            ('54748', '54749'),
+            ('54748', '54749'), # This PR added an extra job: https://github.com/ubccr/xdmod/pull/2176 
             'raw-data-every-1000-no-fields-no-filters.csv',
         ),
         (
