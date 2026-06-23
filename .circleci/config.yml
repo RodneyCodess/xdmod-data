@@ -4,9 +4,13 @@ executors:
   min-python:
     machine:
       image: ubuntu-2004:2024.11.1
+    environment:
+      PYTHON_VERSION: "3.8"
   max-python:
     machine:
       image: ubuntu-2604:2026.05.1
+    environment:
+      PYTHON_VERSION: "3.14"
 
 jobs:
   build_xdmod_images:
