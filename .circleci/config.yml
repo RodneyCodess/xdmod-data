@@ -19,6 +19,7 @@ jobs:
         type: string
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
+      BASE_IMAGE: "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
     machine:
       image: ubuntu-2204:current
     resource_class: large
@@ -63,9 +64,19 @@ jobs:
       - run:
           name: Generate coverage report
           command: ./tests/ci/scripts/generate_coverage_report.sh
+  lint:
+    docker:
+      - image: cimg/python:3.14
+    steps:
+      - checkout 
+      - run:
+          name: Lint
+          command: |
+            python3 -m pip install --upgrade flake8 flake8-commas flake8-quotes
+            python3 -m flake8 . --max-complexity=10 --max-line-length=160 --show-source --exclude __init__.py
 
 workflows:
-  workflow:
+  build_and_test:
     jobs:
       - build_xdmod_images:
           matrix:
@@ -84,3 +95,6 @@ workflows:
           matrix:
             parameters:
               python_version: ["min-python", "max-python"]
+  lint:
+    jobs: 
+      - lint
