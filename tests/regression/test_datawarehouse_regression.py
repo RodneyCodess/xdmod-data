@@ -72,7 +72,7 @@ def __get_data_dir(override_default_data=False):
     [
         (
             {},
-            ('54748', '54749'), # This PR added an extra job: https://github.com/ubccr/xdmod/pull/2176 
+            '54748',
             'raw-data-every-1000-no-fields-no-filters.csv',
         ),
         (
@@ -94,7 +94,7 @@ def __get_data_dir(override_default_data=False):
                     ],
                 },
             },
-            ('33346', '33346'),
+            '33346',
             'raw-data-every-1000-with-fields-and-filters.csv',
         ),
     ],
@@ -114,14 +114,14 @@ def test_get_raw_data(valid_dw, capsys, additional_params, number, csv_title):
         data,
         dtype='string',
         index_col=0,
-
         override_default_data=(
             XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']
         ),
     )
-    xdmod_main_number, xdmod_11_number = number
-    expected_number = xdmod_main_number if XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev'] else xdmod_11_number
-    assert 'Got ' + expected_number + ' rows...DONE' in capsys.readouterr().out
+     # This PR added an extra job: https://github.com/ubccr/xdmod/pull/2176
+    if XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']:
+        number -= 1
+    assert 'Got ' + number + ' rows...DONE' in capsys.readouterr().out
 
 
 def __assert_descriptor_dfs_equal(

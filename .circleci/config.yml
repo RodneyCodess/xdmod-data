@@ -17,6 +17,8 @@ jobs:
     parameters:
       xdmod_version:
         type: string
+    environment:
+      XDMOD_VERSION: << parameters.xdmod_version >>
     machine:
       image: ubuntu-2204:current
     resource_class: large
@@ -24,7 +26,7 @@ jobs:
       - checkout
       - run:
           name: Build XDMoD web server images
-          command: ./tests/ci/scripts/build_xdmod_img.sh "<< parameters.xdmod_version >>"
+          command: ./tests/ci/scripts/build_xdmod_img.sh
       - persist_to_workspace:
           root: .
           paths:
@@ -37,7 +39,6 @@ jobs:
         type: string
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
-      PYTHON_VERSION: << parameters.python_version >>
     executor: << parameters.python_version >>
     steps:
       - checkout
@@ -53,9 +54,7 @@ jobs:
   coverage_report:
     parameters:
       python_version:
-        type: string 
-    environment:
-      PYTHON_VERSION: << parameters.python_version >> 
+        type: string
     executor: << parameters.python_version >>
     steps:
       - checkout
@@ -85,5 +84,3 @@ workflows:
           matrix:
             parameters:
               python_version: ["min-python", "max-python"]
-
-
