@@ -22,7 +22,7 @@ jobs:
       BASE_IMAGE: "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
     machine:
       image: ubuntu-2204:current
-    resource_class: large
+    resource_class: small
     steps:
       - checkout
       - run:
@@ -68,7 +68,7 @@ jobs:
     docker:
       - image: cimg/python:3.14
     steps:
-      - checkout 
+      - checkout
       - run:
           name: Lint
           command: |
@@ -96,5 +96,5 @@ workflows:
             parameters:
               python_version: ["min-python", "max-python"]
   lint:
-    jobs: 
+    jobs:
       - lint
