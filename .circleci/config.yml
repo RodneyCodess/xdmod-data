@@ -95,6 +95,6 @@ workflows:
           matrix:
             parameters:
               python_version: ["min-python", "max-python"]
-  lint:
+  linting:
     jobs: 
       - lint
