@@ -10,12 +10,8 @@ docker cp tests/ci/scripts/openssl.cnf "$XDMOD_VERSION":/root/openssl.cnf
 docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
 docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
-# start !!!!!
-sleep 5
-docker exec "$XDMOD_VERSION" bash -c 'apachectl configtest' || true
-docker exec "$XDMOD_VERSION" bash -c 'ss -tlnp | grep 443' || echo "nothing listening on 443"
-docker exec "$XDMOD_VERSION" bash -c 'tail -30 /var/log/httpd/ssl_error_log 2>/dev/null || tail -30 /var/log/httpd/error_log 2>/dev/null' || echo "no httpd logs"
-# END !!!
+# this allows the xdmod-11-0 container to start up before we try it with requests, otherwise we get a connection refused error with
+sleep 10
 
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 
