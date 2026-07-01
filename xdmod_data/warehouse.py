@@ -303,6 +303,7 @@ class DataWarehouse:
         warnings.warn(
             "get_filter_values() is deprecated and will be removed in a future version. Use get_dimension_data() instead.",
             FutureWarning,
+            stacklevel=2,
             )
         return self.get_dimension_data(realm, dimension)
 
