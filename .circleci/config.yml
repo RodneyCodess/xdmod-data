@@ -1,16 +1,33 @@
 version: 2.1
+parameters:
+  min_python_version:
+    type: string
+    default: "3.8"
+  max_python_version:
+    type: string
+    default: "3.14"
 
 executors:
   min-python:
     machine:
       image: ubuntu-2004:2024.11.1
     environment:
-      PYTHON_VERSION: "3.8"
+      PYTHON_VERSION: << pipeline.parameters.min_python_version >>
   max-python:
     machine:
       image: ubuntu-2604:2026.05.1
     environment:
-      PYTHON_VERSION: "3.14"
+      PYTHON_VERSION: << pipeline.parameters.max_python_version >>
+  min-python-docker:
+    docker:
+      - image: cimg/python:<< pipeline.parameters.min_python_version >>
+    environment:
+      PYTHON_VERSION: << pipeline.parameters.min_python_version >>
+  max-python-docker:
+    docker:
+      - image: cimg/python:<< pipeline.parameters.max_python_version >>
+    environment:
+      PYTHON_VERSION: << pipeline.parameters.max_python_version >>
 
 jobs:
   build_xdmod_images:
@@ -22,7 +39,7 @@ jobs:
       BASE_IMAGE: "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
     machine:
       image: ubuntu-2204:current
-    resource_class: large
+    resource_class: medium
     steps:
       - checkout
       - run:
@@ -36,11 +53,13 @@ jobs:
     parameters:
       xdmod_version:
         type: string
-      python_version:
+      executor:
         type: string
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
-    executor: << parameters.python_version >>
+      MIN_PYTHON_VERSION: << pipeline.parameters.min_python_version >>
+    executor: << parameters.executor >>
+    resource_class: medium
     steps:
       - checkout
       - attach_workspace:
@@ -54,9 +73,10 @@ jobs:
             - .coverage.*
   coverage_report:
     parameters:
-      python_version:
+      executor:
         type: string
-    executor: << parameters.python_version >>
+    executor: << parameters.executor >>
+    resource_class: small
     steps:
       - checkout
       - attach_workspace:
@@ -66,7 +86,8 @@ jobs:
           command: ./tests/ci/scripts/generate_coverage_report.sh
   lint:
     docker:
-      - image: cimg/python:3.14
+      - image: cimg/python:<< pipeline.parameters.max_python_version >>
+    resource_class: small
     steps:
       - checkout
       - run:
@@ -88,13 +109,13 @@ workflows:
           matrix:
             parameters:
               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
-              python_version: ["min-python", "max-python"]
+              executor: ["min-python", "max-python"]
       - coverage_report:
           requires:
             - run_tests
           matrix:
             parameters:
-              python_version: ["min-python", "max-python"]
+              executor: ["min-python-docker", "max-python-docker"]
   lint:
     jobs:
       - lint

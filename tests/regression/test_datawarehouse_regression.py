@@ -72,7 +72,7 @@ def __get_data_dir(override_default_data=False):
     [
         (
             {},
-            '54749',
+            54749,
             'raw-data-every-1000-no-fields-no-filters.csv',
         ),
         (
@@ -123,8 +123,8 @@ def test_get_raw_data(valid_dw, capsys, additional_params, number, csv_title):
         XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']
         and csv_title == 'raw-data-every-1000-no-fields-no-filters.csv'
     ):
-        number = str(int(number) - 1)
-    assert 'Got ' + number + ' rows...DONE' in capsys.readouterr().out
+        number -= 1
+    assert 'Got ' + str(number) + ' rows...DONE' in capsys.readouterr().out
 
 
 def __assert_descriptor_dfs_equal(
