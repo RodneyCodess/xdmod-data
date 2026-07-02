@@ -9,14 +9,18 @@ docker exec "$XDMOD_VERSION" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/f
 docker cp tests/ci/scripts/openssl.cnf "$XDMOD_VERSION":/root/openssl.cnf
 docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
 docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
+
+# this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
+# otherwise a race condition can cause a connection refused error
+timeout 10 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
+
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 
-# select Python version for this cell (both cells)
 pyenv install -s "$PYTHON_VERSION"
 pyenv global "$PYTHON_VERSION"
 
 # the min cell needs the system CA bundle for pip to reach pypi
-if [ "$PYTHON_VERSION" = "3.8" ]; then
+if [ "$PYTHON_VERSION" = "$MIN_PYTHON_VERSION" ]; then
     export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 fi
 
@@ -24,8 +28,8 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -e .[report]
 python3 -m pip install --upgrade python-dotenv pytest pytest-cov
 
-# force-install the oldest supported dependency versions (min cell only)
-if [ "$PYTHON_VERSION" = "3.8" ]; then
+# force-install the oldest supported dependency versions
+if [ "$PYTHON_VERSION" = "$MIN_PYTHON_VERSION" ]; then
     min_dependency_versions=$(awk \
         '/install_requires/ {flag=1} flag && !/install_requires/ && NF {print $0} flag && /^\[.*\]$/ {flag=0}' \
         setup.cfg | tr -d '\n' | sed 's/ >= /==/g'
