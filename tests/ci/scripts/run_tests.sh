@@ -12,12 +12,14 @@ docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
 
 # this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
 # otherwise a race condition can cause a connection refused error
-timeout 10 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
+timeout 90 bash -c 'until curl -sfk https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
 
 docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
 
-pyenv install -s "$PYTHON_VERSION"
-pyenv global "$PYTHON_VERSION"
+if command -v pyenv >/dev/null 2>&1; then
+    pyenv install -s "$PYTHON_VERSION"
+    pyenv global "$PYTHON_VERSION"
+fi
 
 # the min cell needs the system CA bundle for pip to reach pypi
 if [ "$PYTHON_VERSION" = "$MIN_PYTHON_VERSION" ]; then

@@ -48,7 +48,7 @@ jobs:
       xdmod_version:
         type: string
       executor:
-        type: string
+        type: executor
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
       MIN_PYTHON_VERSION: << pipeline.parameters.min_python_version >>
@@ -67,7 +67,7 @@ jobs:
   coverage_report:
     parameters:
       executor:
-        type: string
+        type: executor
     executor: << parameters.executor >>
     steps:
       - checkout
