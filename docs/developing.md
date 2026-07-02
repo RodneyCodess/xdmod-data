@@ -12,6 +12,7 @@ branch:
 ```
 git+https://github.com/username/xdmod-data.git@branch-name
 ```
+`in develop just notes ->` so far for manual testing the proccess goes as `source tests/ci/scripts/manual.env` -> `./tests/ci/scripts/reset_containers.sh` (if you have containers open up already) -> `./tests/ci/scripts/build_xdmod_img.sh` -> `./tests/ci/scripts/reset_containers.sh` -> `./tests/ci/scripts/run_tests.sh` -> when you have 2 converage files then `./tests/ci/scripts/generate_coverage_report.sh`
 
 ## Contributing a Pull Request (PR)
 

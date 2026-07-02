@@ -1,7 +1,0 @@
-build/
-.coverage
-dist/
-docs/_build/
-*.egg-info/
-__pycache__/
-.*.sw?

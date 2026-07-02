@@ -1,6 +1,10 @@
 #!/bin/bash
 set -exo pipefail
 
+: "${XDMOD_VERSION:?XDMOD_VERSION must be set (see tests/ci/scripts/manual.env)}"
+: "${PYTHON_VERSION:?PYTHON_VERSION must be set (see tests/ci/scripts/manual.env)}"
+: "${MIN_PYTHON_VERSION:?MIN_PYTHON_VERSION must be set (see tests/ci/scripts/manual.env)}"
+
 loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
 docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
 

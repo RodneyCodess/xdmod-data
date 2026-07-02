@@ -1,6 +1,9 @@
 #!/bin/bash
 set -exo pipefail
 
+: "${BASE_IMAGE:?BASE_IMAGE must be set (see tests/ci/scripts/manual.env)}"
+: "${XDMOD_VERSION:?XDMOD_VERSION must be set (see tests/ci/scripts/manual.env)}"
+
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR=$BASE_DIR/../../..
 
