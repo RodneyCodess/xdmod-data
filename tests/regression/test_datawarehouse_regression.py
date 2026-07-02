@@ -118,8 +118,11 @@ def test_get_raw_data(valid_dw, capsys, additional_params, number, csv_title):
             XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']
         ),
     )
-     # This PR added an extra job: https://github.com/ubccr/xdmod/pull/2176
-    if XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']:
+    # This PR added an extra job: https://github.com/ubccr/xdmod/pull/2176
+    if (
+        XDMOD_VERSION in ['xdmod-11-0', 'xdmod-11-0-dev']
+        and csv_title == 'raw-data-every-1000-no-fields-no-filters.csv'
+    ):
         number -= 1
     assert 'Got ' + str(number) + ' rows...DONE' in capsys.readouterr().out
 
