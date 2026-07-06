@@ -66,7 +66,10 @@ jobs:
           at: .
       - run:
           name: Run tests against XDMoD web server image
-          command: ./tests/ci/scripts/run_tests.sh
+          command: |
+            loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
+            docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$loaded_image"
+            ./tests/ci/scripts/run_tests.sh
       - persist_to_workspace:
           root: .
           paths:

@@ -5,9 +5,6 @@ set -exo pipefail
 : "${PYTHON_VERSION:?must be set (see tests/ci/scripts/manual.env)}"
 : "${MIN_PYTHON_VERSION:?must be set (see tests/ci/scripts/manual.env)}"
 
-loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
-docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$loaded_image"
-
 # generate cert and copy it out
 docker exec "$CONTAINER_NAME" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
 docker cp tests/ci/scripts/openssl.cnf "$CONTAINER_NAME":/root/openssl.cnf
