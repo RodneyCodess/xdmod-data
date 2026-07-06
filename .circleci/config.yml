@@ -57,7 +57,7 @@ jobs:
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
       CONTAINER_NAME: << parameters.xdmod_version >>
-      git rm -r dist tests/*/__pycache__ xdmod_data.egg-info xdmod_data/__pycache__PORT: 8080
+      PORT: 8080
       MIN_PYTHON_VERSION: << pipeline.parameters.min_python_version >>
     executor: << parameters.executor >>
     steps:
