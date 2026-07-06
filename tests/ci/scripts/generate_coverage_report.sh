@@ -1,7 +1,7 @@
 #!/bin/bash
 set -exo pipefail
 
-: "${PYTHON_VERSION:?PYTHON_VERSION must be set (see tests/ci/scripts/manual.env)}"
+: "${VENV:?must be set (see docs/developing.md)}"
 
 python3 -m pip install --upgrade coverage
 

@@ -1,9 +1,6 @@
 version: 2.1
 
 parameters:
-  min_python_version:
-    type: string
-    default: "3.8"
   max_python_version:
     type: string
     default: "3.14"
@@ -13,7 +10,7 @@ executors:
     machine:
       image: ubuntu-2004:2024.11.1
     environment:
-      PYTHON_VERSION: << pipeline.parameters.min_python_version >>
+      IS_MIN_PYTHON: true
   max-python:
     machine:
       image: ubuntu-2604:2026.05.1
@@ -58,7 +55,6 @@ jobs:
       XDMOD_VERSION: << parameters.xdmod_version >>
       CONTAINER_NAME: << parameters.xdmod_version >>
       PORT: 8080
-      MIN_PYTHON_VERSION: << pipeline.parameters.min_python_version >>
     executor: << parameters.executor >>
     steps:
       - checkout
@@ -69,6 +65,8 @@ jobs:
           command: |
             loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
             docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$loaded_image"
+            pyenv install -s "$PYTHON_VERSION"
+            pyenv global "$PYTHON_VERSION"
             ./tests/ci/scripts/run_tests.sh
       - persist_to_workspace:
           root: .

@@ -1,13 +1,11 @@
 #!/bin/bash
 set -exo pipefail
 
-: "${BASE_IMAGE:?BASE_IMAGE must be set (see tests/ci/scripts/manual.env)}"
-: "${XDMOD_VERSION:?XDMOD_VERSION must be set (see tests/ci/scripts/manual.env)}"
+: "${BASE_IMAGE:?BASE_IMAGE must be set (see docs/developing.md)}"
+: "${XDMOD_VERSION:?XDMOD_VERSION must be set (see docs/developing.md)}"
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR=$BASE_DIR/../../..
-
-docker pull "$BASE_IMAGE"
 
 docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$BASE_IMAGE"
 
