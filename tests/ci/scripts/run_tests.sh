@@ -16,7 +16,7 @@ docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 
 # this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
 # otherwise a race condition can cause a connection refused error
-timeout 90 bash -c 'until curl -sfk https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
+# timeout 90 bash -c 'until curl -sfk https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
 
 docker cp "$CONTAINER_NAME":/etc/pki/tls/certs/localhost.crt .
 
@@ -44,8 +44,8 @@ if [ "$PYTHON_VERSION" = "$MIN_PYTHON_VERSION" ]; then
 fi
 
 # fetch API token
-rest_token=$(curl --cacert "localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:8080/rest/auth/login | jq -r '.results.token')
-api_token=$(curl --cacert "localhost.crt" -sS -X POST -b xdmod.cookie "https://localhost:8080/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+rest_token=$(curl --cacert "localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:$PORT/rest/auth/login | jq -r '.results.token')
+api_token=$(curl --cacert "localhost.crt" -sS -X POST -b xdmod.cookie "https://localhost:$PORT/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
 # write the token where the tests read it
 echo "XDMOD_API_TOKEN=$api_token" > ~/.xdmod-data-token
@@ -53,6 +53,6 @@ echo "XDMOD_API_TOKEN=$api_token" > ~/.xdmod-data-token
 # trust the cert for requests
 cat "localhost.crt" >> "$(python3 -c 'import certifi; print(certifi.where())')"
 
-REQUESTS_CA_BUNDLE=localhost.crt XDMOD_HOST="https://localhost:8080" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/
+REQUESTS_CA_BUNDLE=localhost.crt XDMOD_HOST="https://localhost:$PORT" python3 -m pytest --cov --cov-branch -vvs -o log_cli=true tests/
 
 mv .coverage ".coverage.${PYTHON_VERSION}.${XDMOD_VERSION}"

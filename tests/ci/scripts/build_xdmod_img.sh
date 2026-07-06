@@ -9,7 +9,7 @@ PROJECT_DIR=$BASE_DIR/../../..
 
 docker pull "$BASE_IMAGE"
 
-docker run -dt --name "$CONTAINER_NAME" -h "$XDMOD_VERSION" -p $PORT:443 "$BASE_IMAGE"
+docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$BASE_IMAGE"
 
 if [[ "$XDMOD_VERSION" =~ xdmod-.+-dev ]]; then
     if [ "$XDMOD_VERSION" == 'xdmod-main-dev' ]; then
