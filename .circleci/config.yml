@@ -40,7 +40,7 @@ jobs:
           command: |
             ./tests/ci/scripts/build_xdmod_img.sh
             docker commit "$CONTAINER_NAME" "$XDMOD_VERSION:built"
-            docker save -o "$PROJECT_DIR/$XDMOD_VERSION.tar" "$XDMOD_VERSION:built"
+            docker save -o "$XDMOD_VERSION.tar" "$XDMOD_VERSION:built"
       - persist_to_workspace:
           root: .
           paths:
@@ -60,6 +60,12 @@ jobs:
       - checkout
       - attach_workspace:
           at: .
+      - run:
+          name: Determine Python version
+          command: |
+            if [ "$IS_MIN_PYTHON" = "true" ]; then
+              echo "export PYTHON_VERSION=$(python3 tests/ci/scripts/get_min_python_version.py)" >> "$BASH_ENV";
+            fi
       - run:
           name: Run tests against XDMoD web server image
           command: |
