@@ -1,24 +1,24 @@
 #!/bin/bash
 set -exo pipefail
 
-: "${XDMOD_VERSION:?XDMOD_VERSION must be set (see tests/ci/scripts/manual.env)}"
-: "${PYTHON_VERSION:?PYTHON_VERSION must be set (see tests/ci/scripts/manual.env)}"
-: "${MIN_PYTHON_VERSION:?MIN_PYTHON_VERSION must be set (see tests/ci/scripts/manual.env)}"
+: "${XDMOD_VERSION:?must be set (see tests/ci/scripts/manual.env)}"
+: "${PYTHON_VERSION:?must be set (see tests/ci/scripts/manual.env)}"
+: "${MIN_PYTHON_VERSION:?must be set (see tests/ci/scripts/manual.env)}"
 
 loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
-docker run -dt --name "$XDMOD_VERSION" -p 8080:443 "$loaded_image"
+docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$loaded_image"
 
 # generate cert and copy it out
-docker exec "$XDMOD_VERSION" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
-docker cp tests/ci/scripts/openssl.cnf "$XDMOD_VERSION":/root/openssl.cnf
-docker exec "$XDMOD_VERSION" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
-docker exec "$XDMOD_VERSION" bash -c '/root/bin/services restart'
+docker exec "$CONTAINER_NAME" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
+docker cp tests/ci/scripts/openssl.cnf "$CONTAINER_NAME":/root/openssl.cnf
+docker exec "$CONTAINER_NAME" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
+docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 
 # this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
 # otherwise a race condition can cause a connection refused error
 timeout 90 bash -c 'until curl -sfk https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
 
-docker cp "$XDMOD_VERSION":/etc/pki/tls/certs/localhost.crt .
+docker cp "$CONTAINER_NAME":/etc/pki/tls/certs/localhost.crt .
 
 if command -v pyenv >/dev/null 2>&1; then
     pyenv install -s "$PYTHON_VERSION"

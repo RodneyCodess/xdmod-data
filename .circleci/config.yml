@@ -30,6 +30,8 @@ jobs:
         type: string
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
+      CONTAINER_NAME: << parameters.xdmod_version >>
+      PORT: 8080
       BASE_IMAGE: "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
     machine:
       image: ubuntu-2204:current
@@ -38,7 +40,10 @@ jobs:
       - checkout
       - run:
           name: Build XDMoD web server images
-          command: ./tests/ci/scripts/build_xdmod_img.sh
+          command: |
+            ./tests/ci/scripts/build_xdmod_img.sh
+            docker commit "$CONTAINER_NAME" "$XDMOD_VERSION:built"
+            docker save -o "$PROJECT_DIR/$XDMOD_VERSION.tar" "$XDMOD_VERSION:built"
       - persist_to_workspace:
           root: .
           paths:
@@ -51,6 +56,8 @@ jobs:
         type: executor
     environment:
       XDMOD_VERSION: << parameters.xdmod_version >>
+      CONTAINER_NAME: << parameters.xdmod_version >>
+      git rm -r dist tests/*/__pycache__ xdmod_data.egg-info xdmod_data/__pycache__PORT: 8080
       MIN_PYTHON_VERSION: << pipeline.parameters.min_python_version >>
     executor: << parameters.executor >>
     steps:
@@ -108,6 +115,6 @@ workflows:
           matrix:
             parameters:
               executor: ["min-python", "max-python"]
-  lint_job:
+  lint:
     jobs:
       - lint
