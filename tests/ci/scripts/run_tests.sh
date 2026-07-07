@@ -7,7 +7,7 @@ set -exo pipefail
 
 # generate cert and copy it out
 docker exec "$CONTAINER_NAME" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
-docker cp tests/ci/scripts/openssl.cnf "$CONTAINER_NAME":/root/openssl.cnf
+docker cp tests/ci/artifacts/openssl.cnf "$CONTAINER_NAME":/root/openssl.cnf
 docker exec "$CONTAINER_NAME" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
 docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 

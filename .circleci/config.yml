@@ -16,6 +16,7 @@ executors:
       image: ubuntu-2604:2026.05.1
     environment:
       PYTHON_VERSION: << pipeline.parameters.max_python_version >>
+      IS_MIN_PYTHON: false
   max-python-docker:
     docker:
       - image: cimg/python:<< pipeline.parameters.max_python_version >>
