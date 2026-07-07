@@ -55,6 +55,7 @@ jobs:
       XDMOD_VERSION: << parameters.xdmod_version >>
       CONTAINER_NAME: << parameters.xdmod_version >>
       PORT: 8080
+      VENV: /tmp/venv
     executor: << parameters.executor >>
     steps:
       - checkout
