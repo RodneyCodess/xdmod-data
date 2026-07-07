@@ -13,7 +13,8 @@ docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 
 # this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
 # otherwise a race condition can cause a connection refused error
-# timeout 90 bash -c 'until curl -sfk https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
+# timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
+sleep 30
 
 docker cp "$CONTAINER_NAME":/etc/pki/tls/certs/localhost.crt .
 
