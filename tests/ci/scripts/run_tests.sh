@@ -16,6 +16,16 @@ docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 # timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
 sleep 30
 
+# START OF DEBUGGER
+
+echo "PORT is: [$PORT]"
+docker exec "$CONTAINER_NAME" bash -c 'ss -tlnp | grep 443 || echo "NOTHING on 443"'
+docker exec "$CONTAINER_NAME" bash -c 'curl -sk https://localhost/ -o /dev/null && echo "server OK inside container" || echo "server FAILS inside container (exit $?)"'
+docker exec "$CONTAINER_NAME" bash -c 'tail -15 /var/log/httpd/ssl_error_log 2>/dev/null || tail -15 /var/log/httpd/error_log 2>/dev/null || echo "no httpd logs"'
+
+
+# END OF DEBUGGER
+
 docker cp "$CONTAINER_NAME":/etc/pki/tls/certs/localhost.crt .
 
 if command -v pyenv >/dev/null 2>&1; then
