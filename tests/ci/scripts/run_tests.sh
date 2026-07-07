@@ -14,17 +14,6 @@ docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 # this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
 # otherwise a race condition can cause a connection refused error
 # timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
-sleep 30
-
-# START OF DEBUGGER
-
-echo "PORT is: [$PORT]"
-docker exec "$CONTAINER_NAME" bash -c 'ss -tlnp | grep 443 || echo "NOTHING on 443"'
-docker exec "$CONTAINER_NAME" bash -c 'curl -sk https://localhost/ -o /dev/null && echo "server OK inside container" || echo "server FAILS inside container (exit $?)"'
-docker exec "$CONTAINER_NAME" bash -c 'tail -15 /var/log/httpd/ssl_error_log 2>/dev/null || tail -15 /var/log/httpd/error_log 2>/dev/null || echo "no httpd logs"'
-
-
-# END OF DEBUGGER
 
 docker cp "$CONTAINER_NAME":/etc/pki/tls/certs/localhost.crt .
 
@@ -54,6 +43,9 @@ if [ "$IS_MIN_PYTHON" = "true" ]; then
     )
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
+
+# time out so that server has time to start
+timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; echo '.'; done'
 
 # fetch API token
 rest_token=$(curl --cacert "localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:$PORT/rest/auth/login | jq -r '.results.token')
