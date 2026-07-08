@@ -1,28 +1,51 @@
 #!/bin/bash
 set -exo pipefail
 
-: "${XDMOD_VERSION:?must be set (see docs/developing.md)}"
+MIN_PYTHON="$(python3 tests/ci/scripts/get_min_python_version.py)"
+MAX_PYTHON="3.14"
 
-: "${VENV:?must be set (see docs/developing.md)}"
+declare -A XDMOD_HOSTS=(
+    ["xdmod-main-dev"]="https://xdmod-main-dev"
+    ["xdmod-11.0-dev"]="https://xdmod-11.0-dev"
+    ["xdmod-11.0"]="https://xdmod-11.0"
+)
 
-# generate cert and copy it out
-docker exec "$CONTAINER_NAME" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
-docker cp tests/ci/artifacts/openssl.cnf "$CONTAINER_NAME":/root/openssl.cnf
-docker exec "$CONTAINER_NAME" bash -c "openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf"
-docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
+for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
+    pyenv install -s "$py_version"
+    python$py_version -m venv /tmp/venv-$py_version
+    source /tmp/venv-$py_version/bin/activate
+
+    pip install -e .[report] pytest pytest-cov
+
+    if [ "$py_version" = "$MIN_PYTHON" ]; then
+
+        min_dependency_versions=$(awk \
+            '/install_requires/ {flag=1} flag && !/install_requires/ && NF {print $0} flag && /^\[.*\]$/ {flag=0}' \
+            setup.cfg | tr -d '\n' | sed 's/ >= /==/g'
+        )
+        python3 -m pip install --force-reinstall $min_dependency_versions
+
+    fi
+
+    for xdmod_version in "${!XDMOD_HOSTS[@]}"; do
+        host="${XDMOD_HOSTS[$xdmod_version]}"
+
+        rest_token=$(curl --cacert "localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
+        api_token=$(curl --cacert "localhost.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+
+        echo "XDMOD_API_TOKEN=$api_token" > ~/.xdmod-data-token
+
+        XDMOD_VERSION="$xdmod_version" XDMOD_HOST="$host" python3 -m pytest --cov --cov-branch --cov-append -vvs -o log_cli=true tests/
+
+    done
 
 
-# this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
-# otherwise a race condition can cause a connection refused error
-# timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
 
-docker cp "$CONTAINER_NAME":/etc/pki/tls/certs/localhost.crt .
 
-if command -v pyenv >/dev/null 2>&1; then
-    pyenv install -s "$PYTHON_VERSION"
-    pyenv global "$PYTHON_VERSION"
-fi
+    deactivate
+done
 
+python3 -m coverage report -m
 
 if [ "$IS_MIN_PYTHON" = "true" ]; then
     export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
@@ -45,8 +68,6 @@ if [ "$IS_MIN_PYTHON" = "true" ]; then
     python3 -m pip install --force-reinstall $min_dependency_versions
 fi
 
-# time out so that server has time to start
-timeout 180 bash -c 'until curl -sf https://localhost:$PORT >/dev/null 2>&1; do sleep 1; echo '.'; done'
 
 # fetch API token
 rest_token=$(curl --cacert "localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:$PORT/rest/auth/login | jq -r '.results.token')
