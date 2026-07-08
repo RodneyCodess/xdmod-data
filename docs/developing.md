@@ -9,7 +9,7 @@ Docker running and to follow these steps:
 1. Edit `tests/ci/artifacts/manual.env` to set the desired values.
 1. Run the following command to read those values into the environment:
     ```
-    set -a && source tests/ci/scripts/manual.env && set +a
+    set -a && source tests/ci/artifacts/manual.env && set +a
     ```
 1. Execute `tests/ci/scripts/build_xdmod_img.sh` to run an XDMoD container
    using the values you set in the previous step.
