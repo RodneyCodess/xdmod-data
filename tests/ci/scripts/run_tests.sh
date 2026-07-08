@@ -12,16 +12,6 @@ docker exec "$CONTAINER_NAME" bash -c "openssl req -new -key /etc/pki/tls/privat
 docker exec "$CONTAINER_NAME" bash -c '/root/bin/services restart'
 
 
-sleep 5
-echo "===== services status ====="
-docker exec "$CONTAINER_NAME" bash -c '/root/bin/services status' 2>&1 || true
-echo "===== manually start httpd to see the error ====="
-docker exec "$CONTAINER_NAME" bash -c 'apachectl start' 2>&1 || true
-echo "===== httpd error log ====="
-docker exec "$CONTAINER_NAME" bash -c 'tail -40 /var/log/httpd/error_log' 2>&1 || true
-echo "===== END DIAGNOSTIC ====="
-
-
 # this gives the xdmod-11-0 container a little extra time to start up before we try it with requests,
 # otherwise a race condition can cause a connection refused error
 # timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; done'
@@ -56,7 +46,7 @@ if [ "$IS_MIN_PYTHON" = "true" ]; then
 fi
 
 # time out so that server has time to start
-timeout 90 bash -c 'until curl -sf https://localhost:8080 >/dev/null 2>&1; do sleep 1; echo '.'; done'
+timeout 180 bash -c 'until curl -sf https://localhost:$PORT >/dev/null 2>&1; do sleep 1; echo '.'; done'
 
 # fetch API token
 rest_token=$(curl --cacert "localhost.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' https://localhost:$PORT/rest/auth/login | jq -r '.results.token')
