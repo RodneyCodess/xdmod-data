@@ -13,6 +13,7 @@ declare -A XDMOD_HOSTS=(
 for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     if command -v pyenv >/dev/null 2>&1; then
         pyenv install -s "$py_version"
+        pyenv global "$py_version"
     fi
     python$py_version -m venv /tmp/venv-$py_version
     source /tmp/venv-$py_version/bin/activate
