@@ -7,8 +7,8 @@ prompt=no
 C=XX
 L=Default City
 O=Default Company Ltd
-CN=localhost
+CN=${ENV::XDMOD_CONTAINER}
 
 [v3_req]
 basicConstraints=critical,CA:TRUE
-subjectAltName=DNS:localhost
+subjectAltName=DNS:${ENV::XDMOD_CONTAINER}
