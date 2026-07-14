@@ -23,42 +23,19 @@ jobs:
 
       - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-main-dev
         name: xdmod-main-dev
-        entrypoint:
-          - /bin/bash
-          - -c
-          - >
-            HOSTNAME=xdmod-main-dev openssl req -new
-            -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365
-            -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf
-            && cp /etc/pki/tls/certs/localhost.crt /usr/share/xdmod/html/
-            && /root/bin/services start
-            && tail -f /dev/null
-
+        environment:
+          CONTAINER_NAME: xdmod-main-dev
+        command: ["tail", "-f", "/dev/null"]
       - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11.0-dev
         name: xdmod-11.0-dev
-        entrypoint:
-          - /bin/bash
-          - -c
-          - >
-            HOSTNAME=xdmod-11.0-dev openssl req -new
-            -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365
-            -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf
-            && cp /etc/pki/tls/certs/localhost.crt /usr/share/xdmod/html/
-            && /root/bin/services start
-            && tail -f /dev/null
-
+        environment:
+          CONTAINER_NAME: xdmod-11.0-dev
+        command: ["tail", "-f", "/dev/null"]
       - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11.0
         name: xdmod-11.0
-        entrypoint:
-          - /bin/bash
-          - -c
-          - >
-            HOSTNAME=xdmod-11.0 openssl req -new
-            -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365
-            -out /etc/pki/tls/certs/localhost.crt -config /root/openssl.cnf
-            && cp /etc/pki/tls/certs/localhost.crt /usr/share/xdmod/html/
-            && /root/bin/services start
-            && tail -f /dev/null
+        environment:
+          CONTAINER_NAME: xdmod-11.0
+        command: ["tail", "-f", "/dev/null"]
     steps:
       - checkout
       - run:
