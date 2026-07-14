@@ -23,10 +23,16 @@ jobs:
 
       - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-main-dev
         name: xdmod-main-dev
+        environment:
+          CONTAINER_NAME: xdmod-main-dev
       - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11.0-dev
-        name: xdmod-11-0-dev
+        name: xdmod-11.0-dev
+        environment:
+          CONTAINER_NAME: xdmod-11.0-dev
       - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11.0
-        name: xdmod-11-0
+        name: xdmod-11.0
+        environment:
+          CONTAINER_NAME: xdmod-11.0
     steps:
       - checkout
       - run:
@@ -40,130 +46,3 @@ workflows:
   tests:
     jobs:
       - tests
-# parameters:
-#   max_python_version:
-#     type: string
-#     default: "3.14"
-
-# executors:
-#   min-python:
-#     machine:
-#       image: ubuntu-2004:2024.11.1
-#     environment:
-#       IS_MIN_PYTHON: true
-#   max-python:
-#     machine:
-#       image: ubuntu-2604:2026.05.1
-#     environment:
-#       PYTHON_VERSION: << pipeline.parameters.max_python_version >>
-#       IS_MIN_PYTHON: false
-#   max-python-docker:
-#     docker:
-#       - image: cimg/python:<< pipeline.parameters.max_python_version >>
-
-# jobs:
-#   build_xdmod_images:
-#     parameters:
-#       xdmod_version:
-#         type: string
-#     environment:
-#       XDMOD_VERSION: << parameters.xdmod_version >>
-#       CONTAINER_NAME: << parameters.xdmod_version >>
-#       PORT: 8080
-#       BASE_IMAGE: "tools-ext-01.ccr.xdmod.org/xdmod:x86_64-rockylinux8.9.20231119-v11.0.0-1.0-03"
-#     machine:
-#       image: ubuntu-2204:current
-#     resource_class: medium
-#     steps:
-#       - checkout
-#       - run:
-#           name: Build XDMoD web server images
-#           command: |
-#             ./tests/ci/scripts/build_xdmod_img.sh
-#             docker commit "$CONTAINER_NAME" "$XDMOD_VERSION:built"
-#             docker save -o "$XDMOD_VERSION.tar" "$XDMOD_VERSION:built"
-#       - persist_to_workspace:
-#           root: .
-#           paths:
-#             - << parameters.xdmod_version >>.tar
-#   run_tests:
-#     parameters:
-#       xdmod_version:
-#         type: string
-#       executor:
-#         type: executor
-#     environment:
-#       XDMOD_VERSION: << parameters.xdmod_version >>
-#       CONTAINER_NAME: << parameters.xdmod_version >>
-#       PORT: 8080
-#       VENV: /tmp/venv
-#     executor: << parameters.executor >>
-#     steps:
-#       - checkout
-#       - attach_workspace:
-#           at: .
-#       - run:
-#           name: Determine Python version
-#           command: |
-#             if [ "$IS_MIN_PYTHON" = "true" ]; then
-#               echo "export PYTHON_VERSION=$(python3 tests/ci/scripts/get_min_python_version.py)" >> "$BASH_ENV";
-#             fi
-#       - run:
-#           name: Run tests against XDMoD web server image
-#           command: |
-#             loaded_image="$(docker load -i "$XDMOD_VERSION.tar" | sed 's/Loaded image: //')"
-#             docker run -dt --name "$CONTAINER_NAME" -p $PORT:443 "$loaded_image"
-#             pyenv install -s "$PYTHON_VERSION"
-#             pyenv global "$PYTHON_VERSION"
-#             ./tests/ci/scripts/run_tests.sh
-#       - persist_to_workspace:
-#           root: .
-#           paths:
-#             - .coverage.*
-#   coverage_report:
-#     parameters:
-#       executor:
-#         type: executor
-#     executor: << parameters.executor >>
-#     steps:
-#       - checkout
-#       - attach_workspace:
-#           at: .
-#       - run:
-#           name: Generate coverage report
-#           command: ./tests/ci/scripts/generate_coverage_report.sh
-#   lint:
-#     docker:
-#       - image: cimg/python:<< pipeline.parameters.max_python_version >>
-#     resource_class: small
-#     steps:
-#       - checkout
-#       - run:
-#           name: Lint
-#           command: |
-#             python3 -m pip install --upgrade flake8 flake8-commas flake8-quotes
-#             python3 -m flake8 . --max-complexity=10 --max-line-length=160 --show-source --exclude __init__.py
-
-# workflows:
-#   build_and_test:
-#     jobs:
-#       - build_xdmod_images:
-#           matrix:
-#             parameters:
-#               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
-#       - run_tests:
-#           requires:
-#             - build_xdmod_images
-#           matrix:
-#             parameters:
-#               xdmod_version: ["xdmod-main-dev", "xdmod-11-0-dev", "xdmod-11-0"]
-#               executor: ["min-python", "max-python"]
-#       - coverage_report:
-#           requires:
-#             - run_tests
-#           matrix:
-#             parameters:
-#               executor: ["min-python", "max-python"]
-#   lint:
-#     jobs:
-#       - lint

@@ -11,11 +11,13 @@ declare -A XDMOD_HOSTS=(
 )
 
 for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
+
     if command -v pyenv >/dev/null 2>&1; then
         pyenv install -s "$py_version"
         pyenv global "$py_version"
     fi
-    python$py_version -m venv /tmp/venv-$py_version
+
+    python -m venv /tmp/venv-$py_version
     source /tmp/venv-$py_version/bin/activate
 
     pip install -e .[report] pytest pytest-cov
@@ -33,10 +35,8 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     for xdmod_version in "${!XDMOD_HOSTS[@]}"; do
         host="${XDMOD_HOSTS[$xdmod_version]}"
 
-        docker exec "$xdmod_version" bash -c "openssl genrsa -rand /proc/cpuinfo:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key"
-        docker cp tests/ci/artifacts/openssl.cnf "$xdmod_version":/root/openssl.cnf
-        docker exec "$xdmod_version" bash -c "XDMOD_CONTAINER=$xdmod_version openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -out /etc/pki/tls/certs/$xdmod_version.crt -config /root/openssl.cnf"
-        docker cp $xdmod_version:/etc/pki/tls/certs/$xdmod_version.crt .
+        curl -k https://$xdmod_version/localhost.crt -o $xdmod_version.crt
+
 
         rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
         api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
