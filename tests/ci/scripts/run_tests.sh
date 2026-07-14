@@ -35,10 +35,7 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     for xdmod_version in "${!XDMOD_HOSTS[@]}"; do
         host="${XDMOD_HOSTS[$xdmod_version]}"
 
-        until curl -k -sf https://$xdmod_version/localhost.crt -o $xdmod_version.crt; do
-            echo "waiting for $xdmod_version cert..."
-            sleep 2
-        done
+        curl -k -sf https://$xdmod_version/localhost.crt -o $xdmod_version.crt;
 
 
         rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
