@@ -39,6 +39,7 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
         || { echo "ERROR: cert never became available for $xdmod_version"; exit 1; }
 
 
+
         rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
         api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
