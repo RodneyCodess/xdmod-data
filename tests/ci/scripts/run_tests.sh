@@ -52,4 +52,5 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     deactivate
 done
 
+
 python3 -m coverage report -m
