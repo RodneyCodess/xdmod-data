@@ -6,8 +6,8 @@ MAX_PYTHON="3.14"
 
 declare -A XDMOD_HOSTS=(
     ["xdmod-main-dev"]="https://xdmod-main-dev"
-    ["xdmod-11.0-dev"]="https://xdmod-11.0-dev"
-    ["xdmod-11.0"]="https://xdmod-11.0"
+    ["xdmod-11-0-dev"]="https://xdmod-11-0-dev"
+    ["xdmod-11-0"]="https://xdmod-11-0"
 )
 
 for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do

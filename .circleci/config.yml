@@ -26,15 +26,15 @@ jobs:
         environment:
           CONTAINER_NAME: xdmod-main-dev
         command: ["tail", "-f", "/dev/null"]
-      - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11.0-dev
-        name: xdmod-11.0-dev
+      - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11-0-dev
+        name: xdmod-11-0-dev
         environment:
-          CONTAINER_NAME: xdmod-11.0-dev
+          CONTAINER_NAME: xdmod-11-0-dev
         command: ["tail", "-f", "/dev/null"]
-      - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11.0
-        name: xdmod-11.0
+      - image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11-0
+        name: xdmod-11-0
         environment:
-          CONTAINER_NAME: xdmod-11.0
+          CONTAINER_NAME: xdmod-11-0
         command: ["tail", "-f", "/dev/null"]
     steps:
       - checkout
