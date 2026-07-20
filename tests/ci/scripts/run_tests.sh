@@ -35,6 +35,13 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     for xdmod_version in "${!XDMOD_HOSTS[@]}"; do
         host="${XDMOD_HOSTS[$xdmod_version]}"
 
+
+        # TEMPORARY DIAGNOSTIC
+        echo "=== probing $xdmod_version ==="
+        curl -k -sS "https://$xdmod_version/" -o /dev/null -w "root: HTTP %{http_code}\n" || echo "root: UNREACHABLE"
+        curl -k -sS "https://$xdmod_version/localhost.crt" -w "\ncert endpoint: HTTP %{http_code}\n" || echo "cert: UNREACHABLE"
+        echo "=== end probe ==="
+
         timeout 60 bash -c "until curl -k -sf https://$xdmod_version/localhost.crt -o $xdmod_version.crt; do sleep 2; done" \
         || { echo "ERROR: cert never became available for $xdmod_version"; exit 1; }
 
