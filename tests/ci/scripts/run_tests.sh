@@ -39,10 +39,12 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
         || { echo "ERROR: cert never became available for $xdmod_version"; exit 1; }
 
 
+        rest_response=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login)
+        echo "LOGIN RESPONSE for $xdmod_version: $rest_response"
+        rest_token=$(echo "$rest_response" | jq -r '.results.token')
 
-
-        rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
-        api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+        #rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
+        #api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
         echo "XDMOD_API_TOKEN=$api_token" > ~/.xdmod-data-token
 
