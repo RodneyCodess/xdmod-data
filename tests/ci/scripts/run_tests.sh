@@ -38,13 +38,24 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
         timeout 60 bash -c "until curl -k -sf https://$xdmod_version/localhost.crt -o $xdmod_version.crt; do sleep 2; done" \
         || { echo "ERROR: cert never became available for $xdmod_version"; exit 1; }
 
+        rest_token=""
+        for attempt in $(seq 1 30); do
+            rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie \
+                    -d 'username=normaluser&password=normaluser' \
+                    "$host/rest/auth/login" | jq -r '.results.token')
+            if [ -n "$rest_token" ] && [ "$rest_token" != "null" ]; then
+                break
+            fi
+            echo "waiting for $xdmod_version auth/DB to be ready... (attempt $attempt)"
+            sleep 2
+        done
 
-        rest_response=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login)
-        echo "LOGIN RESPONSE for $xdmod_version: $rest_response"
-        rest_token=$(echo "$rest_response" | jq -r '.results.token')
-
-        #rest_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -c xdmod.cookie -d 'username=normaluser&password=normaluser' $host/rest/auth/login | jq -r '.results.token')
-        #api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
+        # debugging statement to see if the rest_token was retrieved successfully
+        if [ -z "$rest_token" ] || [ "$rest_token" = "null" ]; then
+            echo "ERROR: auth never succeeded for $xdmod_version after retries"
+            exit 1
+        fi
+        api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
         echo "XDMOD_API_TOKEN=$api_token" > ~/.xdmod-data-token
 
