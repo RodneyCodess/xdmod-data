@@ -20,7 +20,7 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     python -m venv /tmp/venv-$py_version
     source /tmp/venv-$py_version/bin/activate
 
-    pip install -e .[report] pytest pytest-cov
+    pip install -e .[report] pytest pytest-cov python-dotenv 
 
     if [ "$py_version" = "$MIN_PYTHON" ]; then
 
@@ -50,7 +50,7 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
             sleep 2
         done
 
-        # debugging statement to see if the rest_token was retrieved successfully
+        # Error checking for the auth token, if it is empty or null after 30 attempts, exit with an error
         if [ -z "$rest_token" ] || [ "$rest_token" = "null" ]; then
             echo "ERROR: auth never succeeded for $xdmod_version after retries"
             exit 1
