@@ -20,7 +20,7 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     python -m venv /tmp/venv-$py_version
     source /tmp/venv-$py_version/bin/activate
 
-    pip install -e .[report] pytest pytest-cov python-dotenv 
+    pip install -e .[report] pytest pytest-cov python-dotenv
 
     if [ "$py_version" = "$MIN_PYTHON" ]; then
 
