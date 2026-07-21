@@ -124,6 +124,7 @@ def test_get_raw_data(valid_dw, capsys, additional_params, number, csv_title):
         and csv_title == 'raw-data-every-1000-no-fields-no-filters.csv'
     ):
         number -= 1
+    print(f"DEBUG: XDMOD_VERSION={XDMOD_VERSION!r} csv_title={csv_title!r} expected_number={number}")
     assert 'Got ' + str(number) + ' rows...DONE' in capsys.readouterr().out
 
 
