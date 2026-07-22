@@ -10,7 +10,8 @@ declare -A XDMOD_HOSTS=(
     ["xdmod-11-0"]="https://xdmod-11-0"
 )
 
-for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
+for py_version in "$MIN_PYTHON" "$MAX_
+PYTHON"; do
 
     if command -v pyenv >/dev/null 2>&1; then
         pyenv install -s "$py_version"
