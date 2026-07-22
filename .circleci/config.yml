@@ -38,6 +38,11 @@ jobs:
       - run:
           name: Run Tests
           command: ./tests/ci/scripts/run_tests.sh
+          environment:
+            GENERATE_DATA_FILES: "1"
+      - store_artifacts:
+          path: tests/regression/data
+          destination: regenerated-data
 
 workflows:
   lint:
