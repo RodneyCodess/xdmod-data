@@ -1,0 +1,24 @@
+services:
+  xdmod-main-dev:
+    image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-main-dev
+    container_name: xdmod-main-dev
+    environment:
+      CONTAINER_NAME: xdmod-main-dev
+  xdmod-11-0-dev:
+    image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11-0-dev
+    container_name: xdmod-11-0-dev
+    environment:
+      CONTAINER_NAME: xdmod-11-0-dev
+  xdmod-11-0:
+    image: tools-ext-01.ccr.xdmod.org/xdmod:xdmod-data-11-0
+    container_name: xdmod-11-0
+    environment:
+      CONTAINER_NAME: xdmod-11-0
+  xdmod-data:
+    image: python:3.14
+    container_name: xdmod-data
+    user: root
+    working_dir: /project
+    volumes:
+      - ../../..:/project
+    command: bash -c "apt-get update && apt-get install -y jq && sleep infinity"
