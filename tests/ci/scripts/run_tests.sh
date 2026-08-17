@@ -1,5 +1,5 @@
 #!/bin/bash
-set -exo pipefail
+set -xo pipefail
 
 MIN_PYTHON="$(python3 tests/ci/scripts/get_min_python_version.py)"
 MAX_PYTHON="3.14"
@@ -59,7 +59,7 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
         fi
 
         curl --cacert "$xdmod_version.crt" -sS -X DELETE -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" || true
-        
+
         api_token=$(curl --cacert "$xdmod_version.crt" -sS -X POST -b xdmod.cookie "$host/rest/users/current/api/token?token=$rest_token" | jq -r '.data.token')
 
         echo "XDMOD_API_TOKEN=$api_token" > ~/.xdmod-data-token
@@ -73,4 +73,4 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
     deactivate
 done
 
-python3 -m coverage report -m
+/tmp/venv-$MAX_PYTHON/bin/python3 -m coverage report -m
