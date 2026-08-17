@@ -72,5 +72,4 @@ for py_version in "$MIN_PYTHON" "$MAX_PYTHON"; do
 
     deactivate
 done
-
 /tmp/venv-$MAX_PYTHON/bin/python3 -m coverage report -m
